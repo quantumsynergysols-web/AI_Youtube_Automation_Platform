@@ -34,6 +34,13 @@ const schema = z.object({
   // Optional: without it the Google sign-in route reports 501 rather than
   // preventing the whole service from booting.
   GOOGLE_CLIENT_ID: z.string().optional(),
+  // Channel connection (FR-2) additionally needs the secret and a redirect URI,
+  // because it uses the authorization code flow rather than an ID token.
+  GOOGLE_CLIENT_SECRET: z.string().optional(),
+  GOOGLE_REDIRECT_URI: z.string().url().optional(),
+
+  // base64 of 32 random bytes: openssl rand -base64 32
+  TOKEN_ENCRYPTION_KEY: z.string().optional(),
 
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().default('AI YouTube Automation <no-reply@example.com>'),

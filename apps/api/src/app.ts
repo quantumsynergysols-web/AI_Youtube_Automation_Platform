@@ -9,6 +9,7 @@ import { errorHandler, notFoundHandler } from './middleware/error'
 import { generalLimiter } from './middleware/rateLimit'
 import authRoutes from './modules/auth/auth.routes'
 import billingRoutes, { webhookRouter } from './modules/billing/billing.routes'
+import channelRoutes from './modules/channels/channels.routes'
 import jobRoutes from './modules/jobs/jobs.routes'
 import healthRoutes from './modules/health/health.routes'
 
@@ -30,6 +31,7 @@ export function createApp() {
   app.use('/health', healthRoutes)
   app.use('/api/auth', authRoutes)
   app.use('/api/billing', billingRoutes)
+  app.use('/api/channels', channelRoutes)
   app.use('/api/jobs', jobRoutes)
 
   app.use(notFoundHandler)
