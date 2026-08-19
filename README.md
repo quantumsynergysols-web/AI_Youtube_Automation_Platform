@@ -148,6 +148,29 @@ The Stripe leg is deliberately manual — it needs a real card entry in test mod
 - The dashboard polls every two seconds. Whether that becomes a WebSocket is still
   an open question in the SRS.
 
+## Gate G1
+
+> A real YouTube channel connects by OAuth, tokens survive a refresh cycle, and
+> history imports.
+
+**Met on 19 August 2026** against a live channel, verified end to end rather than
+by mocks. Two scripts reproduce the check once a channel is connected:
+
+```bash
+cd apps/api
+npx tsx scripts/g1-tokens.ts     # tokens are encrypted at rest, scopes stored
+npx tsx scripts/g1-refresh.ts    # tokens survive a refresh cycle
+```
+
+`g1-refresh.ts` is the one worth keeping. It expires the stored token, requests a
+new one, and asserts six things — that a usable token came back, that it changed,
+that the **stored ciphertext was replaced**, that the expiry moved forward, that
+`lastRefreshedAt` was recorded, and that the **refresh token was preserved**.
+
+That last check matters more than it looks: Google omits the refresh token on
+renewal, so keeping the existing one is the difference between a channel that
+works indefinitely and one that dies silently after an hour.
+
 ## Tests
 
 ```bash
