@@ -45,7 +45,7 @@ export default function Dashboard() {
   const sub = me?.subscription
   return (
     <main className="stack page" id="main-content">
-      <header className="page-header"><div><p className="eyebrow">Workspace overview</p><h1>Dashboard</h1><p>Monitor your plan and recent automation activity.</p></div></header>
+      <header className="page-header"><div><p className="eyebrow">Workspace overview</p><h1>Dashboard</h1><p>Review the work, protect your channel, and decide what gets published.</p></div></header>
       <section className="card">
         <div className="section-heading"><h2>Current usage</h2><span className="status-badge">{sub?.plan ?? 'No plan'}</span></div>
         <p>{sub?.videosUsed ?? 0} videos used this period{sub?.periodEnd ? ` · renews ${new Date(sub.periodEnd).toLocaleDateString()}` : ''}</p>
@@ -57,7 +57,7 @@ export default function Dashboard() {
         <div className="section-heading"><h2 id="recent-jobs">Recent jobs</h2>{data ? <span className="count-badge">{data.jobs.length}</span> : null}</div>
         {!data && !loadError ? <LoadingState label="Loading recent jobs" /> : null}
         {loadError ? <PageState title="Jobs did not load" tone="error" action={<button onClick={() => void load()}>Try again</button>}><p>Recent activity could not be loaded. Check that the API and Redis are available, then retry.</p></PageState> : null}
-        {data?.jobs.length === 0 ? <PageState title="No jobs yet"><p>Run a queue probe above to confirm the automation pipeline is ready.</p></PageState> : null}
+        {data?.jobs.length === 0 ? <PageState title="No jobs yet"><p>Your production activity will appear here for review. You stay in control of what moves forward and what gets published.</p></PageState> : null}
         {data?.jobs.length ? <div className="table-scroll"><table><thead><tr><th>Job</th><th>Stage</th><th>Status</th><th>Attempts</th><th>Result</th></tr></thead><tbody>{data.jobs.map((job) => <tr key={job.id}><td><code>{job.id.slice(0, 8)}</code></td><td>{job.stage}</td><td><span className="status-badge">{job.status}</span></td><td>{job.attempts}</td><td className="muted">{job.result?.echo ?? job.error ?? '—'}</td></tr>)}</tbody></table></div> : null}
       </section>
     </main>

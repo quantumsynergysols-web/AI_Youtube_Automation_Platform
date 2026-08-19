@@ -1,3 +1,4 @@
+# ViralPilot local development stack. Internal ytap identifiers stay stable by design.
 services:
   postgres:
     image: postgres:16-alpine

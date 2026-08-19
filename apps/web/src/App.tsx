@@ -22,6 +22,7 @@ export default function App() {
     <div className="shell">
       <a className="skip-link" href="#main-content">Skip to content</a>
       <nav aria-label="Main navigation">
+        <Link to="/" className="brand">ViralPilot</Link>
         <div className="nav-links">
           <NavLink to="/" end>Dashboard</NavLink>
           <NavLink to="/channels">Channels</NavLink>

@@ -29,7 +29,9 @@ export default function Login() {
 
   return (
     <div className="card">
+      <p className="eyebrow">ViralPilot</p>
       <h1>Sign in</h1>
+      <p>Stay in control of every video while ViralPilot handles the production workflow.</p>
       <Alert error={error} />
       <form className="stack" onSubmit={submit}>
         <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required />

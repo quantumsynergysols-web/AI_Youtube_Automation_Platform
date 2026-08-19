@@ -1,5 +1,6 @@
 {
   "name": "@ytap/api",
+  "description": "ViralPilot API",
   "version": "0.1.0",
   "private": true,
   "type": "commonjs",

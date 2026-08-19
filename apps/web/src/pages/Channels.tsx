@@ -81,7 +81,7 @@ export default function Channels() {
         <div>
           <p className="eyebrow">Publishing access</p>
           <h1>YouTube channels</h1>
-          <p>Connect the channels you want to publish to and measure.</p>
+          <p>Connect the channels you want ViralPilot to protect, measure, and publish to with your approval.</p>
         </div>
         {channels?.length ? <button onClick={() => void connect()} disabled={connecting}>{connecting ? 'Opening Google…' : 'Connect channel'}</button> : null}
       </header>
@@ -108,13 +108,13 @@ export default function Channels() {
         ) : null}
         {channels?.length === 0 ? (
           <PageState title="Connect your first channel" action={<button onClick={() => void connect()} disabled={connecting}>{connecting ? 'Opening Google…' : 'Continue with Google'}</button>}>
-            <p>Connect a YouTube channel to schedule uploads, read channel performance, and check new work against your back catalogue.</p>
+            <p>Connect a YouTube channel so ViralPilot can protect its originality, learn from its performance, and publish only the work you approve.</p>
             <ul className="permission-list">
               <li>View your channel and video history</li>
               <li>Read YouTube Analytics for performance feedback</li>
               <li>Upload videos you approve</li>
             </ul>
-            <p className="muted">Google will show these permissions before anything is granted. You can revoke access at any time.</p>
+            <p className="muted">These permissions let ViralPilot compare new work with your catalogue, measure results, and upload after your approval. Google shows every permission before access is granted, and you can revoke it at any time.</p>
           </PageState>
         ) : null}
         {channels?.length ? (

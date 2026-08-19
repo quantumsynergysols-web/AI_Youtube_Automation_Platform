@@ -1,4 +1,4 @@
-# Working agreement
+# ViralPilot working agreement
 
 Two agents work this repository. The split is by lane, not by seniority of code —
 both write production code, and both are held to the same Definition of Done.
