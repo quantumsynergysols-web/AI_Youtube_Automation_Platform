@@ -8,6 +8,7 @@ import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
 import Channels from './pages/Channels'
+import ScriptReview from './pages/ScriptReview'
 
 function Protected({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth()
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/billing" element={<Protected><Billing /></Protected>} />
         <Route path="/channels" element={<Protected><Channels /></Protected>} />
+        <Route path="/projects/:id/script" element={<Protected><ScriptReview /></Protected>} />
         <Route path="/" element={<Protected><Dashboard /></Protected>} />
       </Routes>
     </div>

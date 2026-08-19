@@ -12,6 +12,7 @@ rewritten.
 | CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | **merged** | #2 |
 | CDX-002 | Channels screen for FR-2, with proper loading, empty and error states | UI/UX | **merged** | #6 |
 | CDX-003 | Integration tests for channel connection and history import | QA | open | — |
+| CDX-005 | Script review screen (FR-4.5, the human checkpoint) | UI/UX | **in review** | #12 |
 
 ---
 
