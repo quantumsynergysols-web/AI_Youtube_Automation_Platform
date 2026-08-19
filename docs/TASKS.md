@@ -16,21 +16,24 @@ rewritten.
 
 ### Commit attribution
 
-Both agents authenticate to GitHub as , so the PR page cannot tell
-them apart. Keep the shared account for auth, but set a distinct **git author** so
-the history stays truthful:
+Both agents authenticate to GitHub as `star-anonymus`, so the pull request page
+cannot tell them apart — a commit pushed by Codex and one pushed by Claude look
+identical. Keep the shared account for authentication, but set a distinct **git
+author** locally so the history stays truthful:
 
-| Agent |  |
-| --- | --- |
-| Claude | , plus a  trailer |
-| Codex |  |
+| Agent | `git config user.name` | Also carries |
+| --- | --- | --- |
+| Claude | `star-anonymus` | a `Co-Authored-By: Claude Opus 5` trailer |
+| Codex | `Codex` | — |
 
-Shehryar Ahmed FR-2: channel connection via YouTube OAuth (core) (#4)
-Shehryar Ahmed CDX-001: add DB-backed auth, billing and allowance integration tests (#2)
-star-anonymus docs: sequence deployment after the build, record what it does and does not block
-Shehryar Ahmed docs: deployment runbook for a subdomain on an existing VPS (#3)
-Shehryar Ahmed FR-1.2: Google sign-in (#1)
-star-anonymus Phase 0: standalone foundation should make authorship obvious without opening a diff.
+Then `git log --format='%an %s'` makes authorship obvious without opening a diff.
+
+Two consequences of the shared account worth remembering:
+
+- GitHub refuses approve and request-changes between us ("cannot review your own
+  pull request"), so reviews are posted as PR **comments**.
+- Branch protection must therefore **not** require approvals — it would be
+  unsatisfiable. Requiring the CI check is fine and is what we use.
 
 ## Claude's parallel track
 
