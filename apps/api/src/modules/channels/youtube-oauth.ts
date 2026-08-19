@@ -192,3 +192,87 @@ export async function fetchChannel(accessToken: string): Promise<YouTubeChannel>
     videoCount: num(item.statistics?.videoCount),
   }
 }
+
+export interface PlaylistPage {
+  videos: Array<{
+    youtubeVideoId: string
+    title: string
+    description: string | null
+    publishedAt: Date
+  }>
+  nextPageToken: string | null
+  totalResults: number
+}
+
+/**
+ * Every channel has an auto-maintained "uploads" playlist holding its whole back
+ * catalogue. Reading that is one quota unit per 50 videos, where searching would
+ * be 100 units per call — the difference between importing a 1,000-video channel
+ * for 20 units and for 2,000.
+ */
+export async function fetchUploadsPlaylistId(accessToken: string): Promise<string> {
+  const url = new URL('https://www.googleapis.com/youtube/v3/channels')
+  url.searchParams.set('part', 'contentDetails')
+  url.searchParams.set('mine', 'true')
+
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+  if (!res.ok) {
+    logger.warn({ status: res.status }, 'youtube channels.list contentDetails failed')
+    throw badRequest('Could not read that channel\'s uploads. Try again shortly.')
+  }
+
+  const body = (await res.json()) as {
+    items?: Array<{ contentDetails?: { relatedPlaylists?: { uploads?: string } } }>
+  }
+  const playlistId = body.items?.[0]?.contentDetails?.relatedPlaylists?.uploads
+  if (!playlistId) throw badRequest('That channel has no uploads playlist.')
+  return playlistId
+}
+
+export async function fetchPlaylistPage(
+  accessToken: string,
+  playlistId: string,
+  pageToken?: string | null,
+): Promise<PlaylistPage> {
+  const url = new URL('https://www.googleapis.com/youtube/v3/playlistItems')
+  url.searchParams.set('part', 'snippet,contentDetails')
+  url.searchParams.set('playlistId', playlistId)
+  url.searchParams.set('maxResults', '50')
+  if (pageToken) url.searchParams.set('pageToken', pageToken)
+
+  const res = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } })
+  if (!res.ok) {
+    logger.warn({ status: res.status }, 'youtube playlistItems.list failed')
+    throw badRequest('Could not read the channel history. Try again shortly.')
+  }
+
+  const body = (await res.json()) as {
+    nextPageToken?: string
+    pageInfo?: { totalResults?: number }
+    items?: Array<{
+      contentDetails?: { videoId?: string; videoPublishedAt?: string }
+      snippet?: { title?: string; description?: string; publishedAt?: string }
+    }>
+  }
+
+  const videos = (body.items ?? [])
+    .map((item) => {
+      const id = item.contentDetails?.videoId
+      if (!id) return null
+      const published = item.contentDetails?.videoPublishedAt ?? item.snippet?.publishedAt
+      return {
+        youtubeVideoId: id,
+        title: item.snippet?.title ?? 'Untitled',
+        description: item.snippet?.description || null,
+        publishedAt: published ? new Date(published) : new Date(0),
+      }
+    })
+    // Deleted or private items come back without a videoId; drop rather than store blanks.
+    .filter((v): v is NonNullable<typeof v> => v !== null)
+
+  return {
+    videos,
+    nextPageToken: body.nextPageToken ?? null,
+    totalResults: body.pageInfo?.totalResults ?? videos.length,
+  }
+}

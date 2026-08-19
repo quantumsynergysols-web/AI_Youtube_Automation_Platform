@@ -4,6 +4,7 @@ import { logger } from '../../lib/logger'
 import { encryptSecret, decryptSecret } from '../../lib/crypto'
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors'
 import { planDefinition } from '../../config/plans'
+import { importChannelHistoryInBackground } from './history.service'
 import {
   buildAuthUrl,
   consumeState,
@@ -63,6 +64,16 @@ async function assertChannelSlotAvailable(userId: string): Promise<void> {
   }
 }
 
+/** Shared ownership check so routes never trust a channel id from the URL. */
+export async function assertOwnsChannel(userId: string, channelId: string): Promise<void> {
+  const channel = await prisma.channel.findUnique({
+    where: { id: channelId },
+    select: { userId: true },
+  })
+  // Same response whether it is missing or someone else's: do not confirm existence.
+  if (!channel || channel.userId !== userId) throw notFound('No such channel.')
+}
+
 export async function startConnect(userId: string): Promise<{ url: string }> {
   await assertChannelSlotAvailable(userId)
   const { url } = await buildAuthUrl(userId)
@@ -117,6 +128,11 @@ export async function completeConnect(code: string, state: string): Promise<Chan
   })
 
   logger.info({ userId, channelId: created.id }, 'channel connected')
+
+  // FR-2.5 — the catalogue is needed by FR-9, but the creator should not wait
+  // for it and a failure here must not fail the connection.
+  importChannelHistoryInBackground(created.id)
+
   return toView(created)
 }
 

@@ -5,6 +5,7 @@ import { asyncRoute } from '../../middleware/error'
 import { requireAuth } from '../../middleware/auth'
 import { logger } from '../../lib/logger'
 import * as service from './channels.service'
+import { importChannelHistory, listChannelVideos } from './history.service'
 
 const router = Router()
 
@@ -59,6 +60,25 @@ router.get(
       logger.warn({ err }, 'channel connect callback failed')
       return back({ connected: 'error', reason: message })
     }
+  }),
+)
+
+router.get(
+  '/:id/videos',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    await service.assertOwnsChannel(req.user!.sub, req.params.id!)
+    res.json({ videos: await listChannelVideos(req.params.id!) })
+  }),
+)
+
+/** Re-run the import by hand. Idempotent: existing videos are refreshed, not duplicated. */
+router.post(
+  '/:id/import',
+  requireAuth,
+  asyncRoute(async (req, res) => {
+    await service.assertOwnsChannel(req.user!.sub, req.params.id!)
+    res.json(await importChannelHistory(req.params.id!))
   }),
 )
 

@@ -52,6 +52,7 @@ enum ProjectState {
 
 enum JobStage {
   DUMMY
+  IMPORT
   SCRIPT
   VOICE
   VISUALS
@@ -187,10 +188,32 @@ model Channel {
   connectedAt      DateTime  @default(now())
   lastRefreshedAt  DateTime?
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects Project[]
+  videos   ChannelVideo[]
 
   @@index([userId])
+}
+
+/// FR-2.5 back catalogue. FR-9 compares each new script against these to block
+/// near-duplicates of the creator's own work, so titles and descriptions are
+/// stored rather than just ids.
+model ChannelVideo {
+  id             String   @id @default(uuid())
+  channelId      String
+  youtubeVideoId String
+  title          String
+  description    String?
+  publishedAt    DateTime
+  durationSec    Int?
+  viewCount      Int?
+  importedAt     DateTime @default(now())
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  /// Re-importing must update rather than duplicate.
+  @@unique([channelId, youtubeVideoId])
+  @@index([channelId, publishedAt])
 }
 
 model Project {
