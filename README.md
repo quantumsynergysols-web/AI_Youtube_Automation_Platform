@@ -8,6 +8,7 @@ authentication and accounts (FR-1), subscriptions, billing and quota (FR-12), an
 cross-language job queue that later phases run generation work on.
 
 Design documents live in [`docs/`](docs/); diagram sources in [`docs/diagrams/`](docs/diagrams/).
+Deployment to a subdomain on an existing VPS: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ---
 
