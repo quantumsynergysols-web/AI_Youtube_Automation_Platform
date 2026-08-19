@@ -34,6 +34,13 @@ enum SubscriptionStatus {
   INCOMPLETE
 }
 
+enum SceneRole {
+  HOOK
+  INTRODUCTION
+  BODY
+  CALL_TO_ACTION
+}
+
 enum ProjectState {
   DRAFT
   SCRIPTING
@@ -266,6 +273,15 @@ model Scene {
   id       String  @id @default(uuid())
   scriptId String
   ordinal  Int
+  /// Which part of the video this scene is, so the review UI can label it and
+  /// the guard can tell the hook apart from the body.
+  role     SceneRole @default(BODY)
+  /// Exactly what the voiceover says for this scene. Lives on the scene rather
+  /// than only in Script.beats because FR-5 renders audio per scene and has to
+  /// align it to this scene's image.
+  narration String   @default("")
+  /// The image prompt. Self-contained by construction — the image model sees
+  /// this and nothing else.
   prompt   String
   imageUrl String?
   clipUrl  String?

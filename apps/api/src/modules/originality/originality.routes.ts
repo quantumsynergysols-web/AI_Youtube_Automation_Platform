@@ -1,23 +1,10 @@
 import { Router } from 'express'
-import { prisma } from '../../lib/prisma'
-import { notFound } from '../../lib/errors'
+import { assertOwnsProject } from '../../lib/ownership'
 import { asyncRoute } from '../../middleware/error'
 import { requireAuth } from '../../middleware/auth'
 import { getOriginalityCheck, runOriginalityCheck } from './originality.service'
 
 const router = Router()
-
-/**
- * Never trust a project id from the URL. Reports "no such project" for someone
- * else's id rather than 403, so the endpoint does not confirm it exists.
- */
-async function assertOwnsProject(userId: string, projectId: string): Promise<void> {
-  const project = await prisma.project.findUnique({
-    where: { id: projectId },
-    select: { userId: true },
-  })
-  if (!project || project.userId !== userId) throw notFound('No such project.')
-}
 
 /** FR-9.1 — run the guard. Re-runnable: fix what was flagged, then ask again. */
 router.post(
