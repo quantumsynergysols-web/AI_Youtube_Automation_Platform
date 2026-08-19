@@ -10,7 +10,8 @@ rewritten.
 | ID | Title | Lane | Status | PR |
 | --- | --- | --- | --- | --- |
 | CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | **merged** | #2 |
-| CDX-002 | Channels screen for FR-2, with proper loading, empty and error states | UI/UX | open | — |
+| CDX-002 | Channels screen for FR-2, with proper loading, empty and error states | UI/UX | **merged** | #6 |
+| CDX-003 | Integration tests for channel connection and history import | QA | open | — |
 
 ---
 
@@ -46,7 +47,7 @@ Not Codex work. Listed so the two lanes do not collide.
 | FR-2 Channel connection, YouTube OAuth | 1 | **merged** (#4) — API only, UI is CDX-002 |
 | FR-2.5 full history import (back catalogue) | 1 | **merged** (#5) |
 | FR-9 Originality Guard | 4 | unblocked — the catalogue it compares against now exists |
-| Gate G1 live verification | 1 | blocked on Google OAuth client credentials |
+| Gate G1 live verification | 1 | **MET** 19 Aug 2026 — verified against a live channel |
 | Lease-based reclaim to replace reclaim-on-boot | infra | deferred — single worker is correct for now |
 
 ### Sequencing note — deployment is deliberately deferred

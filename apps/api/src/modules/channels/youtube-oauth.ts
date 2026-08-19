@@ -179,7 +179,13 @@ export async function fetchChannel(accessToken: string): Promise<YouTubeChannel>
 
   const item = body.items?.[0]
   if (!item) {
-    throw badRequest('That Google account has no YouTube channel. Create one, then connect again.')
+    // An empty result covers two very different situations, and the difference
+    // is invisible to the user unless we spell it out: the account may have no
+    // channel at all, or the channel may be a Brand Account that was not the
+    // identity chosen on the Google account screen during consent.
+    throw badRequest(
+      'No YouTube channel was found on that Google account. If the channel is a Brand Account, pick the channel itself on the Google account screen rather than a personal account. Otherwise create a channel on YouTube first, then connect again.',
+    )
   }
 
   const num = (v: string | undefined) => (v === undefined ? null : Number.parseInt(v, 10))
