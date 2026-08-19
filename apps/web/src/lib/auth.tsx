@@ -19,6 +19,7 @@ interface AuthValue {
   me: Me | null
   loading: boolean
   signIn: (email: string, password: string) => Promise<void>
+  signInWithGoogle: (idToken: string) => Promise<void>
   signOut: () => Promise<void>
   reload: () => Promise<void>
 }
@@ -55,6 +56,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await reload()
   }, [reload])
 
+  const signInWithGoogle = useCallback(async (idToken: string) => {
+    const res = await api<{ accessToken: string; refreshToken: string }>('/api/auth/google', {
+      method: 'POST',
+      body: JSON.stringify({ idToken }),
+    })
+    tokens.set(res.accessToken, res.refreshToken)
+    await reload()
+  }, [reload])
+
   const signOut = useCallback(async () => {
     const refresh = tokens.refresh
     if (refresh) {
@@ -65,7 +75,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMe(null)
   }, [])
 
-  return <Ctx.Provider value={{ me, loading, signIn, signOut, reload }}>{children}</Ctx.Provider>
+  return (
+    <Ctx.Provider value={{ me, loading, signIn, signInWithGoogle, signOut, reload }}>
+      {children}
+    </Ctx.Provider>
+  )
 }
 
 export function useAuth(): AuthValue {

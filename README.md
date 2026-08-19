@@ -164,7 +164,7 @@ CI runs all three on every push and pull request.
 | Requirement | Status | Note |
 | --- | --- | --- |
 | FR-1.1 Email registration with verification | Done | Token hashed at rest; only the hash is stored |
-| FR-1.2 Google OAuth sign-in | **Not implemented** | Deferred; see below |
+| FR-1.2 Google OAuth sign-in | Done | ID-token flow; links to an existing account only when Google asserts the address is verified |
 | FR-1.3 Password reset via time-limited token | Done | 60-minute expiry, revokes all sessions on use |
 | FR-1.4 Profile, locale and account deletion | Partial | Soft delete and locale done; profile editing UI pending |
 | FR-12.1 Stripe checkout and customer portal | Done | Webhook signature verified, replay-safe |
@@ -173,10 +173,15 @@ CI runs all three on every push and pull request.
 | FR-12.4 Local payment methods | Not started | P2, pending demand validation (SRS open issue 3) |
 | FR-12.5 Dunning, invoices, tax fields | Not started | Handled by the Stripe portal for now |
 
-**FR-1.2 is the one P0 item not delivered.** It needs a Google Cloud OAuth client,
-which is also required for FR-2 (channel connection) in Phase 1. Doing both against
-one verified client is less work than doing them separately, so it is scheduled with
-Phase 1 rather than duplicated here. Gate G0 does not depend on it.
+**All Phase 0 P0 requirements are now delivered.** FR-1.2 uses the Google Identity
+Services ID-token flow, which is the right shape for sign-in. FR-2 (channel
+connection) needs a different flow from the same OAuth client — the authorization
+code flow with offline access and YouTube scopes — and lands in Phase 1.
+
+Set `GOOGLE_CLIENT_ID` (API) and `VITE_GOOGLE_CLIENT_ID` (web) to enable it. Left
+unset, the API route returns 501 and the web app simply does not render the button,
+so a deployment without Google configured shows email sign-in only rather than a
+control that fails when clicked.
 
 ---
 
@@ -191,3 +196,6 @@ Phase 1 rather than duplicated here. Gate G0 does not depend on it.
   status so suspension takes effect immediately rather than at token expiry.
 - Stripe webhook events are recorded by id before the effect is applied, making
   redelivery idempotent.
+- Google sign-in links to an existing password account **only** when Google asserts
+  `email_verified`. Without that check, anyone able to present a token for an
+  unverified address would inherit the matching account.

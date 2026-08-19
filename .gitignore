@@ -19,3 +19,6 @@ apps/api/prisma/*.db
 # Remove these two lines once the repo is private.
 docs/*.docx
 docs/*.pdf
+
+# Agent worktrees — Codex checks branches out under here. Never part of a commit.
+.worktrees/

@@ -19,7 +19,7 @@ Not Codex work. Listed so the two lanes do not collide.
 
 | Item | Phase | Status |
 | --- | --- | --- |
-| FR-1.2 Google OAuth sign-in | 0 (carried) | not started |
+| FR-1.2 Google OAuth sign-in | 0 (carried) | done — `claude/phase0-google-oauth` |
 | FR-2 Channel connection, YouTube OAuth | 1 | not started |
 | Lease-based reclaim to replace reclaim-on-boot | infra | not started |
 

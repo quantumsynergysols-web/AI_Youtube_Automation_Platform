@@ -57,6 +57,18 @@ router.post(
 )
 
 router.post(
+  '/google',
+  authLimiter,
+  asyncRoute(async (req, res) => {
+    const body = z
+      .object({ idToken: z.string().min(1, 'Missing Google credential.') })
+      .parse(req.body)
+    const result = await service.signInWithGoogle(body.idToken, req.headers['user-agent'])
+    res.json(result)
+  }),
+)
+
+router.post(
   '/refresh',
   asyncRoute(async (req, res) => {
     const body = refreshBody.parse(req.body)

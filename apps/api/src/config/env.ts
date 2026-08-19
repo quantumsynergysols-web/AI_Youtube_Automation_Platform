@@ -31,6 +31,10 @@ const schema = z.object({
   STRIPE_PRICE_PRO: z.string().optional(),
   STRIPE_PRICE_STUDIO: z.string().optional(),
 
+  // Optional: without it the Google sign-in route reports 501 rather than
+  // preventing the whole service from booting.
+  GOOGLE_CLIENT_ID: z.string().optional(),
+
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().default('AI YouTube Automation <no-reply@example.com>'),
 })

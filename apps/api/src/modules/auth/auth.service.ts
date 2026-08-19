@@ -4,10 +4,11 @@ import { Plan, SubscriptionStatus, TokenPurpose, UserStatus } from '@prisma/clie
 import { env } from '../../config/env'
 import { prisma } from '../../lib/prisma'
 import { logger } from '../../lib/logger'
-import { badRequest, conflict, unauthorized } from '../../lib/errors'
+import { badRequest, conflict, forbidden, unauthorized } from '../../lib/errors'
 import { expiresIn, generateToken, hashToken } from '../../lib/tokens'
 import { resetEmail, sendMail, verificationEmail } from '../../lib/mailer'
 import { signAccessToken } from '../../middleware/auth'
+import { verifyGoogleIdToken } from './google'
 
 const VERIFICATION_TTL_MIN = 60 * 24
 const RESET_TTL_MIN = 60
@@ -251,4 +252,89 @@ export async function deleteAccount(userId: string): Promise<void> {
 /** Exposed for tests that need a token without going through email. */
 export function decodeAccessToken(token: string) {
   return jwt.verify(token, env.JWT_ACCESS_SECRET)
+}
+
+/**
+ * FR-1.2 — sign in with a Google ID token issued to this application.
+ *
+ * The linking rules are the security-sensitive part of this file:
+ *
+ *   1. A known googleId signs in directly.
+ *   2. An unknown googleId whose email already has an account links to it —
+ *      but ONLY when Google asserts the address is verified. Skipping that
+ *      check would let anyone who can mint a token for an unverified address
+ *      take over the matching password account.
+ *   3. Otherwise a new account is created, again only for a verified address,
+ *      since we would otherwise be trusting an email the caller may not own.
+ *
+ * A linked or created account is ACTIVE immediately: Google has already done
+ * the email round-trip our own verification flow exists to perform.
+ */
+export async function signInWithGoogle(idToken: string, userAgent?: string): Promise<AuthResult> {
+  const identity = await verifyGoogleIdToken(idToken)
+
+  const byGoogleId = await prisma.user.findUnique({ where: { googleId: identity.googleId } })
+  if (byGoogleId) {
+    if (byGoogleId.status === UserStatus.DELETED) {
+      throw unauthorized('That account no longer exists.')
+    }
+    logger.info({ userId: byGoogleId.id }, 'google sign-in, existing link')
+    return buildAuthResult(
+      {
+        id: byGoogleId.id,
+        email: byGoogleId.email,
+        status: byGoogleId.status,
+        isAdmin: byGoogleId.isAdmin,
+      },
+      userAgent,
+    )
+  }
+
+  const byEmail = await prisma.user.findUnique({ where: { email: identity.email } })
+  if (byEmail) {
+    if (byEmail.status === UserStatus.DELETED) {
+      throw unauthorized('That account no longer exists.')
+    }
+    if (!identity.emailVerified) {
+      throw forbidden(
+        'Google has not verified that email address, so it cannot be linked to an existing account. Sign in with your password instead.',
+      )
+    }
+
+    const linked = await prisma.user.update({
+      where: { id: byEmail.id },
+      data: {
+        googleId: identity.googleId,
+        status:
+          byEmail.status === UserStatus.PENDING_VERIFICATION ? UserStatus.ACTIVE : byEmail.status,
+      },
+    })
+    logger.info({ userId: linked.id }, 'google sign-in, linked to existing account')
+    return buildAuthResult(
+      { id: linked.id, email: linked.email, status: linked.status, isAdmin: linked.isAdmin },
+      userAgent,
+    )
+  }
+
+  if (!identity.emailVerified) {
+    throw forbidden(
+      'Google has not verified that email address. Create an account with your email and password instead.',
+    )
+  }
+
+  const created = await prisma.user.create({
+    data: {
+      email: identity.email,
+      googleId: identity.googleId,
+      passwordHash: null,
+      status: UserStatus.ACTIVE,
+    },
+  })
+  await createFreeSubscription(created.id)
+  logger.info({ userId: created.id }, 'google sign-in, new account')
+
+  return buildAuthResult(
+    { id: created.id, email: created.email, status: created.status, isAdmin: created.isAdmin },
+    userAgent,
+  )
 }
