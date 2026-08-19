@@ -241,14 +241,22 @@ model Project {
 }
 
 model Script {
-  id            String    @id @default(uuid())
-  projectId     String    @unique
-  artDirection  String?
-  hook          String?
-  beats         Json?
-  wordCount     Int       @default(0)
-  humanEditedAt DateTime?
-  createdAt     DateTime  @default(now())
+  id                String    @id @default(uuid())
+  projectId         String    @unique
+  artDirection      String?
+  hook              String?
+  beats             Json?
+  /// FR-9.3 — the creator's own insight, written by them rather than generated.
+  /// Its presence is what separates a video with a point of view from a
+  /// mass-produced one, and the Originality Guard refuses to pass without it.
+  commentary        String?
+  commentaryAddedAt DateTime?
+  /// FR-9.6 audit trail: evidence a human was actually involved.
+  hookEditedAt      DateTime?
+  humanInputMs      Int       @default(0)
+  wordCount         Int       @default(0)
+  humanEditedAt     DateTime?
+  createdAt         DateTime  @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
   scenes  Scene[]
@@ -308,14 +316,25 @@ model Asset {
 }
 
 model OriginalityCheck {
-  id           String       @id @default(uuid())
-  projectId    String       @unique
-  score        Float
-  duplicateOf  String?
-  humanInputMs Int          @default(0)
-  verdict      GuardVerdict
-  reason       String?
-  checkedAt    DateTime     @default(now())
+  id                 String       @id @default(uuid())
+  projectId          String       @unique
+  /// Overall originality, 0..1. Higher is better.
+  score              Float
+  /// Highest similarity found against the channel back catalogue, 0..1.
+  similarity         Float        @default(0)
+  /// youtubeVideoId of the closest prior work, when one was close enough to name.
+  duplicateOf        String?
+  humanInputMs       Int          @default(0)
+  /// FR-9.6 audit trail, kept as evidence if a strike is ever appealed.
+  hookEdited         Boolean      @default(false)
+  hasCommentary      Boolean      @default(false)
+  /// FR-9.5 — YouTube requires disclosure of synthetic or altered media.
+  requiresDisclosure Boolean      @default(true)
+  /// FR-9.4 — non-blocking cadence warnings.
+  warnings           String[]     @default([])
+  verdict            GuardVerdict
+  reason             String?
+  checkedAt          DateTime     @default(now())
 
   project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 }
