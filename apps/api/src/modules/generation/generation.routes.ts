@@ -85,9 +85,16 @@ const editsBody = z
   .object({
     hook: z.string().max(500).optional(),
     commentary: z.string().max(5_000).optional(),
+    // Rewrites to individual scenes. Without this a similarity block has no
+    // remedy but regeneration, because the guard scores scene narration and
+    // nothing else here could change it.
+    scenes: z
+      .array(z.object({ ordinal: z.number().int().min(0), narration: z.string().max(5_000) }))
+      .max(100)
+      .optional(),
     // How long the creator spent in the editor, measured by the client. Only
     // ever added to, and only ever corroborating evidence — the guard's real
-    // test is whether the hook and commentary actually changed.
+    // test is whether the text actually changed.
     humanInputMs: z.number().int().min(0).max(6 * 60 * 60 * 1000).optional(),
   })
   .refine((b) => Object.keys(b).length > 0, { message: 'Provide at least one field to update.' })

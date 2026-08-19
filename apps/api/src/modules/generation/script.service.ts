@@ -201,6 +201,14 @@ export async function generateScript(
         },
       })
 
+      // Discard any previous guard result. It was computed against a script
+      // that no longer exists, and assertPublishable reads only the stored
+      // verdict — so a stale PASS would let an entirely regenerated script
+      // publish unchecked, which defeats FR-9 completely. Deleting rather than
+      // marking stale makes the gate fail closed: no row means "not checked
+      // yet", which it already refuses.
+      await tx.originalityCheck.deleteMany({ where: { projectId } })
+
       // Scenes are positional, so a regeneration replaces them wholesale rather
       // than trying to match old ordinals onto new ones.
       await tx.scene.deleteMany({ where: { scriptId: saved.id } })
@@ -246,9 +254,24 @@ export async function generateScript(
   }
 }
 
+export interface SceneEdit {
+  ordinal: number
+  narration: string
+}
+
 export interface HumanEdits {
   hook?: string
   commentary?: string
+  /**
+   * Rewrites to individual scenes.
+   *
+   * Exists because a similarity block would otherwise have no remedy short of
+   * regenerating the whole script: the guard measures hook and beats, and beats
+   * come from scene narration. Being told the video is too close to a previous
+   * one, with no way to change the offending lines, would leave the creator
+   * rerolling and hoping.
+   */
+  scenes?: SceneEdit[]
   humanInputMs?: number
 }
 
@@ -262,12 +285,14 @@ export interface HumanEdits {
 export async function applyHumanEdits(projectId: string, edits: HumanEdits): Promise<void> {
   const script = await prisma.script.findUnique({
     where: { projectId },
-    select: { id: true, hook: true },
+    select: { id: true, hook: true, scenes: { select: { ordinal: true, role: true, narration: true } } },
   })
   if (!script) throw notFound('This project has no script yet.')
 
   const data: Record<string, unknown> = {}
   const now = new Date()
+  // Whether this edit changed anything the Originality Guard measures.
+  let contentChanged = false
 
   if (edits.hook !== undefined) {
     const hook = edits.hook.trim()
@@ -279,6 +304,7 @@ export async function applyHumanEdits(projectId: string, edits: HumanEdits): Pro
     if (hook !== script.hook) {
       data.hookEditedAt = now
       data.humanEditedAt = now
+      contentChanged = true
     }
   }
 
@@ -287,6 +313,51 @@ export async function applyHumanEdits(projectId: string, edits: HumanEdits): Pro
     data.commentary = commentary || null
     data.commentaryAddedAt = commentary ? now : null
     data.humanEditedAt = now
+    contentChanged = true
+  }
+
+  // Scene rewrites, applied against the scenes actually on this script so an
+  // ordinal from a previous generation cannot write into the current one.
+  const byOrdinal = new Map(script.scenes.map((s) => [s.ordinal, s]))
+  const sceneWrites: { ordinal: number; narration: string }[] = []
+
+  if (edits.scenes?.length) {
+    for (const edit of edits.scenes) {
+      const existing = byOrdinal.get(edit.ordinal)
+      if (!existing) throw badRequest(`This script has no scene ${edit.ordinal}.`)
+      const narration = edit.narration.trim()
+      if (!narration) throw badRequest(`Scene ${edit.ordinal} cannot be left empty.`)
+      if (narration === existing.narration) continue
+      sceneWrites.push({ ordinal: edit.ordinal, narration })
+    }
+
+    if (sceneWrites.length > 0) {
+      contentChanged = true
+      data.humanEditedAt = now
+      // The hook lives on the script as well as on its scene, so an edit to the
+      // hook scene has to move both or the two disagree about what the video says.
+      const editedHook = sceneWrites.find(
+        (w) => byOrdinal.get(w.ordinal)!.role === SceneRole.HOOK,
+      )
+      if (editedHook && editedHook.narration !== script.hook) {
+        data.hook = editedHook.narration
+        data.hookEditedAt = now
+      }
+
+      // Rebuild beats from the post-edit scenes. FR-9 scores hook plus beats, so
+      // if beats still held the generated narration the creator's rewrite would
+      // not move the similarity score at all — which is the entire reason this
+      // edit path exists.
+      const merged = new Map(sceneWrites.map((w) => [w.ordinal, w.narration]))
+      data.beats = script.scenes
+        .filter((s) => s.role !== SceneRole.HOOK)
+        .sort((a, b) => a.ordinal - b.ordinal)
+        .map((s) => merged.get(s.ordinal) ?? s.narration)
+      data.wordCount = script.scenes.reduce(
+        (sum, s) => sum + countWords(merged.get(s.ordinal) ?? s.narration),
+        0,
+      )
+    }
   }
 
   if (edits.humanInputMs !== undefined) {
@@ -297,13 +368,45 @@ export async function applyHumanEdits(projectId: string, edits: HumanEdits): Pro
 
   if (Object.keys(data).length === 0) throw badRequest('Nothing to update.')
 
-  await prisma.script.update({ where: { id: script.id }, data })
-  logger.info({ projectId, fields: Object.keys(data) }, 'human edits applied to script')
+  await prisma.$transaction(async (tx) => {
+    await tx.script.update({ where: { id: script.id }, data })
+
+    for (const write of sceneWrites) {
+      await tx.scene.update({
+        where: { scriptId_ordinal: { scriptId: script.id, ordinal: write.ordinal } },
+        data: { narration: write.narration },
+      })
+    }
+
+    // Any stored verdict was computed against the previous text. Publishing
+    // reads only the stored verdict, so leaving a PASS in place would let edited
+    // text publish on the strength of a check that never saw it. Dropping the
+    // row makes the gate fail closed — it already refuses when none exists.
+    //
+    // Time spent is not content: recording it must not silently void a verdict.
+    if (contentChanged) {
+      await tx.originalityCheck.deleteMany({ where: { projectId } })
+    }
+  })
+
+  logger.info(
+    { projectId, fields: Object.keys(data), scenesEdited: sceneWrites.length, contentChanged },
+    'human edits applied to script',
+  )
 }
 
 export async function getScript(projectId: string) {
   return prisma.script.findUnique({
     where: { projectId },
-    include: { scenes: { orderBy: { ordinal: 'asc' } } },
+    include: {
+      scenes: { orderBy: { ordinal: 'asc' } },
+      // The brief travels with the script so the review screen can show length
+      // against the target the creator actually asked for. Without it a word
+      // count is a number with nothing to compare against, and the client would
+      // have to make a second request to say anything useful about it.
+      project: {
+        select: { topic: true, targetDurationSec: true, language: true, style: true, state: true },
+      },
+    },
   })
 }

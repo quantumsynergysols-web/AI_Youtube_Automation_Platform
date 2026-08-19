@@ -5,7 +5,8 @@ const prismaMock = {
   project: { findUnique: vi.fn(), update: vi.fn() },
   channelVideo: { findMany: vi.fn() },
   script: { upsert: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
-  scene: { deleteMany: vi.fn(), createMany: vi.fn() },
+  scene: { deleteMany: vi.fn(), createMany: vi.fn(), update: vi.fn() },
+  originalityCheck: { deleteMany: vi.fn() },
   $transaction: vi.fn(),
 }
 vi.mock('../src/lib/prisma', () => ({ prisma: prismaMock }))
@@ -74,6 +75,8 @@ beforeEach(() => {
   prismaMock.script.upsert.mockResolvedValue({ id: 'script-1' })
   prismaMock.scene.deleteMany.mockResolvedValue({})
   prismaMock.scene.createMany.mockResolvedValue({})
+  prismaMock.scene.update.mockResolvedValue({})
+  prismaMock.originalityCheck.deleteMany.mockResolvedValue({ count: 0 })
   prismaMock.$transaction.mockImplementation(async (fn: (tx: unknown) => unknown) => fn(prismaMock))
 })
 
@@ -200,6 +203,16 @@ describe('generateScript', () => {
     expect(update).not.toHaveProperty('commentary')
   })
 
+  it('discards the previous guard verdict, which was computed against a script that no longer exists', async () => {
+    // Without this: generate, check, PASS, regenerate an entirely different
+    // script, publish. assertPublishable reads only the stored verdict, so the
+    // stale PASS carries the new script through and FR-9 is fully bypassed.
+    await generateScript('project-1', fakeProvider(draft()))
+    expect(prismaMock.originalityCheck.deleteMany).toHaveBeenCalledWith({
+      where: { projectId: 'project-1' },
+    })
+  })
+
   it('lays scenes on a contiguous timeline', async () => {
     const result = await generateScript('project-1', fakeProvider(draft()))
     for (let i = 1; i < result.scenes.length; i++) {
@@ -249,7 +262,14 @@ describe('generateScript', () => {
 
 describe('applyHumanEdits (FR-4.5)', () => {
   beforeEach(() => {
-    prismaMock.script.findUnique.mockResolvedValue({ id: 'script-1', hook: 'the generated hook' })
+    prismaMock.script.findUnique.mockResolvedValue({
+      id: 'script-1',
+      hook: 'the generated hook',
+      scenes: [
+        { ordinal: 0, role: SceneRole.HOOK, narration: 'the generated hook' },
+        { ordinal: 1, role: SceneRole.BODY, narration: 'first body line' },
+      ],
+    })
     prismaMock.script.update.mockResolvedValue({})
   })
 
@@ -282,7 +302,7 @@ describe('applyHumanEdits (FR-4.5)', () => {
     expect(prismaMock.script.update.mock.calls[0]![0].data.commentaryAddedAt).toBeInstanceOf(Date)
 
     vi.clearAllMocks()
-    prismaMock.script.findUnique.mockResolvedValue({ id: 'script-1', hook: 'h' })
+    prismaMock.script.findUnique.mockResolvedValue({ id: 'script-1', hook: 'h', scenes: [] })
     await applyHumanEdits('project-1', { commentary: '  ' })
     const data = prismaMock.script.update.mock.calls[0]![0].data
     expect(data.commentary).toBeNull()
@@ -296,8 +316,96 @@ describe('applyHumanEdits (FR-4.5)', () => {
     expect(prismaMock.script.update.mock.calls[0]![0].data.humanInputMs).toEqual({ increment: 45_000 })
   })
 
+  it('voids a stored verdict when the hook changes', async () => {
+    // The verdict was measured against the old text. Publishing reads only the
+    // stored verdict, so keeping it would let edited text publish on a check
+    // that never saw it.
+    await applyHumanEdits('project-1', { hook: 'a genuinely different hook' })
+    expect(prismaMock.originalityCheck.deleteMany).toHaveBeenCalledOnce()
+  })
+
+  it('does not void a verdict when only time spent is recorded', async () => {
+    // Time is not content. Recording it must not silently invalidate a pass.
+    await applyHumanEdits('project-1', { humanInputMs: 30_000 })
+    expect(prismaMock.originalityCheck.deleteMany).not.toHaveBeenCalled()
+  })
+
+  it('does not void a verdict when the hook is saved unchanged', async () => {
+    await applyHumanEdits('project-1', { hook: 'the generated hook' })
+    expect(prismaMock.originalityCheck.deleteMany).not.toHaveBeenCalled()
+  })
+
   it('rejects an edit to a project with no script yet', async () => {
     prismaMock.script.findUnique.mockResolvedValue(null)
     await expect(applyHumanEdits('project-1', { hook: 'x' })).rejects.toMatchObject({ status: 404 })
+  })
+})
+
+describe('applyHumanEdits — scene rewrites', () => {
+  beforeEach(() => {
+    prismaMock.script.findUnique.mockResolvedValue({
+      id: 'script-1',
+      hook: 'the generated hook',
+      scenes: [
+        { ordinal: 0, role: SceneRole.HOOK, narration: 'the generated hook' },
+        { ordinal: 1, role: SceneRole.BODY, narration: 'first body line' },
+        { ordinal: 2, role: SceneRole.BODY, narration: 'second body line' },
+      ],
+    })
+    prismaMock.script.update.mockResolvedValue({})
+  })
+
+  it('rewrites beats from the edited scenes, so the guard actually re-scores', async () => {
+    // If beats kept the generated narration, a creator rewriting a scene to
+    // escape a similarity block would see the score refuse to move — which
+    // would make this whole edit path pointless.
+    await applyHumanEdits('project-1', {
+      scenes: [{ ordinal: 1, narration: 'a completely different first point' }],
+    })
+    const data = prismaMock.script.update.mock.calls[0]![0].data
+    expect(data.beats).toEqual(['a completely different first point', 'second body line'])
+  })
+
+  it('keeps the hook on the script in step with the hook scene', async () => {
+    await applyHumanEdits('project-1', {
+      scenes: [{ ordinal: 0, narration: 'a sharper opening line' }],
+    })
+    const data = prismaMock.script.update.mock.calls[0]![0].data
+    expect(data.hook).toBe('a sharper opening line')
+    expect(data.hookEditedAt).toBeInstanceOf(Date)
+  })
+
+  it('voids the stored verdict after a scene rewrite', async () => {
+    await applyHumanEdits('project-1', { scenes: [{ ordinal: 2, narration: 'new second point' }] })
+    expect(prismaMock.originalityCheck.deleteMany).toHaveBeenCalledOnce()
+  })
+
+  it('ignores a scene submitted unchanged', async () => {
+    await expect(
+      applyHumanEdits('project-1', { scenes: [{ ordinal: 1, narration: 'first body line' }] }),
+    ).rejects.toMatchObject({ status: 400 })
+    expect(prismaMock.scene.update).not.toHaveBeenCalled()
+  })
+
+  it('refuses an ordinal this script does not have', async () => {
+    // Guards against an ordinal from a previous generation writing into the
+    // current script.
+    await expect(
+      applyHumanEdits('project-1', { scenes: [{ ordinal: 99, narration: 'x' }] }),
+    ).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('refuses to blank a scene', async () => {
+    await expect(
+      applyHumanEdits('project-1', { scenes: [{ ordinal: 1, narration: '   ' }] }),
+    ).rejects.toMatchObject({ status: 400 })
+  })
+
+  it('recomputes the word count across the edited script', async () => {
+    await applyHumanEdits('project-1', {
+      scenes: [{ ordinal: 1, narration: 'one two three four five six' }],
+    })
+    // 3 (hook) + 6 (edited) + 3 (untouched)
+    expect(prismaMock.script.update.mock.calls[0]![0].data.wordCount).toBe(12)
   })
 })
