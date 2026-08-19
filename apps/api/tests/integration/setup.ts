@@ -1,3 +1,5 @@
+import { randomBytes } from 'node:crypto'
+
 const databaseUrl = process.env.TEST_DATABASE_URL ?? process.env.DATABASE_URL ??
   'postgresql://ytap:ytap@localhost:5432/ytap_test?schema=public'
 
@@ -40,3 +42,7 @@ process.env.JWT_REFRESH_SECRET ??= 'integration-refresh-secret-at-least-32-chara
 process.env.STRIPE_SECRET_KEY ??= 'sk_test_dummy'
 process.env.STRIPE_WEBHOOK_SECRET ??= 'whsec_integration_test_secret'
 process.env.STRIPE_PRICE_CREATOR ??= 'price_creator_integration'
+process.env.GOOGLE_CLIENT_ID ??= 'integration-google-client'
+process.env.GOOGLE_CLIENT_SECRET ??= randomBytes(24).toString('hex')
+process.env.GOOGLE_REDIRECT_URI ??= 'http://localhost:4300/api/channels/callback'
+process.env.TOKEN_ENCRYPTION_KEY ??= randomBytes(32).toString('base64')
