@@ -11,6 +11,7 @@ import authRoutes from './modules/auth/auth.routes'
 import billingRoutes, { webhookRouter } from './modules/billing/billing.routes'
 import channelRoutes from './modules/channels/channels.routes'
 import jobRoutes from './modules/jobs/jobs.routes'
+import projectRoutes from './modules/projects/projects.routes'
 import generationRoutes from './modules/generation/generation.routes'
 import originalityRoutes from './modules/originality/originality.routes'
 import healthRoutes from './modules/health/health.routes'
@@ -35,6 +36,7 @@ export function createApp() {
   app.use('/api/billing', billingRoutes)
   app.use('/api/channels', channelRoutes)
   app.use('/api/jobs', jobRoutes)
+  app.use('/api/projects', projectRoutes)
   app.use('/api/projects', generationRoutes)
   app.use('/api/projects', originalityRoutes)
 
