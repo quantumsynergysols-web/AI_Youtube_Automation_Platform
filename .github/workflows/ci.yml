@@ -36,6 +36,7 @@ jobs:
       - run: npx prisma migrate deploy
       - run: npm run typecheck
       - run: npm test
+      - run: npm run test:integration
 
   worker:
     runs-on: ubuntu-latest
