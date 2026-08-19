@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
+import { GoogleButton } from '../components/GoogleButton'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -40,6 +41,7 @@ export default function Register() {
           <button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create account'}</button>
         </form>
       )}
+      {!done && <GoogleButton onError={setError} />}
       <p className="muted">Already registered? <Link to="/login">Sign in</Link>.</p>
     </div>
   )

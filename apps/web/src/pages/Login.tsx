@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
+import { GoogleButton } from '../components/GoogleButton'
 
 export default function Login() {
   const { me, signIn } = useAuth()
@@ -38,6 +39,7 @@ export default function Login() {
           <Link to="/forgot-password" className="muted">Forgot password?</Link>
         </div>
       </form>
+      <GoogleButton onError={setError} />
       <p className="muted">No account yet? <Link to="/register">Create one</Link>.</p>
     </div>
   )
