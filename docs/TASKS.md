@@ -44,7 +44,8 @@ Not Codex work. Listed so the two lanes do not collide.
 | FR-1.2 Google OAuth sign-in | 0 (carried) | **merged** (#1) |
 | Deployment runbook | infra | **merged** (#3) |
 | FR-2 Channel connection, YouTube OAuth | 1 | **merged** (#4) — API only, UI is CDX-002 |
-| FR-2.5 full history import (back catalogue) | 1 | next — FR-9 duplicate detection needs it |
+| FR-2.5 full history import (back catalogue) | 1 | **merged** (#5) |
+| FR-9 Originality Guard | 4 | unblocked — the catalogue it compares against now exists |
 | Gate G1 live verification | 1 | blocked on Google OAuth client credentials |
 | Lease-based reclaim to replace reclaim-on-boot | infra | deferred — single worker is correct for now |
 
