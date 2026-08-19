@@ -14,7 +14,27 @@ if (!/(^|_)test($|_)/i.test(databaseName)) {
 process.env.NODE_ENV = 'test'
 process.env.LOG_LEVEL = 'silent'
 process.env.DATABASE_URL = databaseUrl
-process.env.REDIS_URL ??= 'redis://localhost:6379'
+// Redis has no equivalent of the database-name guard above, and this suite calls
+// flushdb() between tests. Locally that is the same Redis the dev worker uses, so
+// default to a dedicated index and refuse index 0 outright.
+const redisUrl =
+  process.env.TEST_REDIS_URL ?? process.env.REDIS_URL ?? 'redis://localhost:6379/15'
+
+let redisIndex: string
+try {
+  redisIndex = new URL(redisUrl).pathname.replace(/^\//, '')
+} catch {
+  throw new Error('Integration tests require a valid REDIS_URL or TEST_REDIS_URL.')
+}
+if (!redisIndex || redisIndex === '0') {
+  throw new Error(
+    `Refusing to run integration tests against Redis database ${redisIndex || '0'}: ` +
+      'flushdb() would wipe the development queue. Use an explicit non-zero index, ' +
+      'for example redis://localhost:6379/15.',
+  )
+}
+
+process.env.REDIS_URL = redisUrl
 process.env.JWT_ACCESS_SECRET ??= 'integration-access-secret-at-least-32-characters'
 process.env.JWT_REFRESH_SECRET ??= 'integration-refresh-secret-at-least-32-characters'
 process.env.STRIPE_SECRET_KEY ??= 'sk_test_dummy'
