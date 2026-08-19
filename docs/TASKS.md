@@ -9,7 +9,8 @@ rewritten.
 
 | ID | Title | Lane | Status | PR |
 | --- | --- | --- | --- | --- |
-| CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | open | — |
+| CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | in review — changes requested | #2 |
+| CDX-002 | UI/UX pass: loading, empty and error states across the web app | UI/UX | queued behind CDX-001 | — |
 
 ---
 
@@ -19,9 +20,30 @@ Not Codex work. Listed so the two lanes do not collide.
 
 | Item | Phase | Status |
 | --- | --- | --- |
-| FR-1.2 Google OAuth sign-in | 0 (carried) | done — `claude/phase0-google-oauth` |
-| FR-2 Channel connection, YouTube OAuth | 1 | not started |
-| Lease-based reclaim to replace reclaim-on-boot | infra | not started |
+| FR-1.2 Google OAuth sign-in | 0 (carried) | **merged** (#1) |
+| Deployment runbook | infra | **merged** (#3) |
+| FR-2 Channel connection, YouTube OAuth | 1 | **next** |
+| FR-2 history import and token refresh | 1 | after FR-2 core |
+| Lease-based reclaim to replace reclaim-on-boot | infra | deferred — single worker is correct for now |
+
+### Sequencing note — deployment is deliberately deferred
+
+The product ships before it is hosted. A domain and public deployment are a
+launch concern, and blocking build progress on them would be the wrong trade.
+
+What this does **not** block: FR-2 development. A Google Cloud OAuth client with
+`http://localhost` origins needs no consent-screen verification and allows up to
+100 test users, which is ample for building and testing channel connection.
+
+What it **does** block, and therefore must be resolved before launch:
+
+- Google consent-screen verification, which is domain-bound and slow — and
+  slower still for YouTube scopes, which Google treats as sensitive
+- Stripe live mode and its webhook endpoint
+- Any email sent to a real creator
+
+Revisit at the end of Phase 1, which is when Google verification needs to be
+in flight to avoid it becoming the critical path. Tracked as SRS open issue 6.
 
 ---
 
