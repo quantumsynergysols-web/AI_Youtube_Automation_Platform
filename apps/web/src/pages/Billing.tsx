@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '../lib/api'
+import { actionErrorMessage } from '../lib/errors'
 import { LoadingState, PageState } from '../components/PageState'
 
 interface PlanDef { id: string; name: string; priceUsd: number; videosPerMonth: number; channels: number }
@@ -27,14 +28,20 @@ export default function Billing() {
     try {
       const response = await api<{ url: string }>('/api/billing/checkout', { method: 'POST', body: JSON.stringify({ plan: planId.toUpperCase() }) })
       window.location.assign(response.url)
-    } catch { setActionError('Checkout could not be opened. Confirm billing is configured, then try again.'); setBusy(null) }
+    } catch (error) {
+      setActionError(actionErrorMessage(error, 'Checkout could not be opened.', 'Confirm billing is configured, then try again.'))
+      setBusy(null)
+    }
   }
   async function openPortal() {
     setActionError(null); setBusy('portal')
     try {
       const response = await api<{ url: string }>('/api/billing/portal', { method: 'POST' })
       window.location.assign(response.url)
-    } catch { setActionError('The billing portal could not be opened. Subscribe to a paid plan first or try again shortly.'); setBusy(null) }
+    } catch (error) {
+      setActionError(actionErrorMessage(error, 'The billing portal could not be opened.', 'Subscribe to a paid plan first or try again shortly.'))
+      setBusy(null)
+    }
   }
 
   const allowance = data?.allowance

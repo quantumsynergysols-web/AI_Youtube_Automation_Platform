@@ -1,3 +1,5 @@
+import { ApiFailure } from '../lib/errors.ts'
+
 export interface ChannelNotice {
   tone: 'ok' | 'info' | 'error'
   message: string
@@ -8,7 +10,7 @@ export function formatChannelCount(value: number | null): string {
 }
 
 export function channelLoadError(error: unknown): string {
-  if (isApiFailure(error) && error.status === 401) {
+  if (error instanceof ApiFailure && error.status === 401) {
     return 'Your session ended before channels could load. Sign in again, then return here.'
   }
   return 'Channels could not be loaded. Check your connection and try again.'
@@ -35,17 +37,11 @@ export function callbackNotice(search: string): ChannelNotice | null {
 }
 
 export function connectError(error: unknown): string {
-  if (isApiFailure(error) && error.status === 403) {
+  if (error instanceof ApiFailure && error.status === 403) {
     return `${error.error.message} Review plans in Billing to connect more channels.`
   }
-  if (isApiFailure(error) && error.status === 501) {
+  if (error instanceof ApiFailure && error.status === 501) {
     return 'Channel connection is not available on this deployment. Ask the deployment administrator to configure Google channel access.'
   }
   return 'The Google connection could not be started. Check your connection and try again.'
-}
-
-function isApiFailure(error: unknown): error is { status: number; error: { message: string } } {
-  if (!error || typeof error !== 'object') return false
-  const candidate = error as { status?: unknown; error?: { message?: unknown } }
-  return typeof candidate.status === 'number' && typeof candidate.error?.message === 'string'
 }

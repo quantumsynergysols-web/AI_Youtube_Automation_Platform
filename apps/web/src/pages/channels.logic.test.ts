@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
+import { actionErrorMessage, ApiFailure } from '../lib/errors.ts'
 import { callbackNotice, channelLoadError, connectError, formatChannelCount } from './channels.logic.ts'
 
 describe('channel screen state copy', () => {
@@ -17,13 +18,21 @@ describe('channel screen state copy', () => {
   })
 
   it('turns plan-limit and unavailable responses into actionable copy', () => {
-    const limit = { status: 403, error: { message: 'The Free plan allows 1 connected channel.' } }
+    const limit = new ApiFailure(403, { code: 'forbidden', message: 'The Free plan allows 1 connected channel.' })
     assert.match(connectError(limit), /Review plans in Billing/)
-    const unavailable = { status: 501, error: { message: 'raw' } }
+    const unavailable = new ApiFailure(501, { code: 'channel_connect_unavailable', message: 'raw' })
     assert.match(connectError(unavailable), /not available on this deployment/)
   })
 
   it('does not expose raw list errors', () => {
     assert.equal(channelLoadError(new Error('database details')), 'Channels could not be loaded. Check your connection and try again.')
+  })
+
+  it('keeps actionable server billing errors before UI guidance', () => {
+    const error = new ApiFailure(400, { code: 'bad_request', message: 'No Stripe price is configured for the CREATOR plan.' })
+    assert.equal(
+      actionErrorMessage(error, 'Checkout could not be opened.', 'Confirm billing is configured, then try again.'),
+      'No Stripe price is configured for the CREATOR plan. Confirm billing is configured, then try again.',
+    )
   })
 })
