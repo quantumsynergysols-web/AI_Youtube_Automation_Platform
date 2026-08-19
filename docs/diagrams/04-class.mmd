@@ -1,0 +1,92 @@
+classDiagram
+  class User {
+    +UUID id
+    +String email
+    +String locale
+    +Status status
+    +register()
+    +deleteAccount()
+  }
+  class Subscription {
+    +Plan plan
+    +int videosUsed
+    +Date periodEnd
+    +hasAllowance() bool
+    +consume(n)
+  }
+  class Channel {
+    +String youtubeChannelId
+    +String title
+    +bytes oauthTokenEnc
+    +refreshToken()
+    +revoke()
+  }
+  class Project {
+    +String topic
+    +int targetDurationSec
+    +String language
+    +ProjectState state
+    +start()
+    +cancel()
+  }
+  class Script {
+    +String artDirection
+    +String hook
+    +int wordCount
+    +Date humanEditedAt
+    +isHumanApproved() bool
+  }
+  class Scene {
+    +int ordinal
+    +String prompt
+    +int startMs
+    +int endMs
+  }
+  class RenderJob {
+    +Stage stage
+    +int attempts
+    +decimal costUsd
+    +retry()
+    +fail(reason)
+  }
+  class Asset {
+    +Kind kind
+    +String storageKey
+    +long bytes
+  }
+  class OriginalityCheck {
+    +float score
+    +UUID duplicateOf
+    +int humanInputMs
+    +Verdict verdict
+    +blocksPublish() bool
+  }
+  class Publication {
+    +String youtubeVideoId
+    +Date scheduledFor
+    +Visibility visibility
+    +publish()
+  }
+  class MetricSnapshot {
+    +int views
+    +float ctr
+    +int avgViewDuration
+    +retentionJson
+  }
+  class UsageRecord {
+    +decimal costUsd
+    +bool billed
+  }
+
+  User "1" --> "1" Subscription
+  User "1" --> "*" Channel
+  User "1" --> "*" Project
+  Channel "1" --> "*" Project
+  Project "1" --> "1" Script
+  Script "1" --> "*" Scene
+  Project "1" --> "*" RenderJob
+  Project "1" --> "*" Asset
+  Project "1" --> "1" OriginalityCheck
+  Project "1" --> "0..1" Publication
+  Publication "1" --> "*" MetricSnapshot
+  Project "1" --> "*" UsageRecord

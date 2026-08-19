@@ -1,0 +1,27 @@
+{
+  "protocol": "redis-list-v1",
+  "keys": {
+    "pending": "q:{queue}",
+    "processing": "q:{queue}:processing",
+    "record": "job:{id}",
+    "deadLetter": "q:{queue}:dead"
+  },
+  "queues": [
+    "default"
+  ],
+  "types": {
+    "dummy.echo": {
+      "phase": 0,
+      "description": "Gate G0 probe. Echoes its payload back after a short delay.",
+      "payload": {
+        "message": "string",
+        "delayMs": "number (optional)"
+      }
+    }
+  },
+  "defaults": {
+    "maxAttempts": 3,
+    "leaseSeconds": 600,
+    "backoffBaseMs": 2000
+  }
+}

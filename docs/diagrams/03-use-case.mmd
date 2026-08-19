@@ -1,0 +1,39 @@
+flowchart LR
+  CR(["Creator"])
+  AD(["Administrator"])
+  SCHED(["Scheduler<br/>system actor"])
+  METRICS(["Metric poller<br/>system actor"])
+  YT(["YouTube<br/>external"])
+
+  U1["Connect channel"]
+  U2["Choose or accept topic"]
+  U3["Review and edit hook"]
+  U4["Add original commentary"]
+  U5["Generate video"]
+  U6["Pick title and thumbnail"]
+  U7["Schedule publication"]
+  U8["Review performance"]
+  U9["Manage subscription"]
+  U10["Publish queued video"]
+  U11["Ingest channel metrics"]
+  U12["Recommend next topics"]
+  U13["Suspend account on cost ceiling"]
+  U14["Re-run failed job"]
+
+  CR --- U1
+  CR --- U2
+  CR --- U3
+  CR --- U4
+  CR --- U5
+  CR --- U6
+  CR --- U7
+  CR --- U8
+  CR --- U9
+  SCHED --- U10
+  METRICS --- U11
+  U11 --> U12
+  AD --- U13
+  AD --- U14
+  U1 --- YT
+  U10 --- YT
+  U11 --- YT

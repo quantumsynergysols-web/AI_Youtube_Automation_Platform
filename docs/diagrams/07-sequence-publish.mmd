@@ -1,0 +1,38 @@
+sequenceDiagram
+  actor C as Creator
+  participant UI as Web app
+  participant API as API service
+  participant G as Originality Guard
+  participant DB as Database
+  participant SCH as Scheduler
+  participant YT as YouTube API
+
+  C->>UI: request publish
+  UI->>API: POST /publications
+  API->>G: evaluate(project)
+  G->>DB: fetch channel back catalogue
+  DB-->>G: prior scripts + embeddings
+  G->>G: similarity, human input time, template check
+
+  alt score below threshold
+    G-->>API: BLOCKED + reason
+    API-->>UI: publish disabled, remedy shown
+    UI-->>C: "add original commentary"
+  else score acceptable
+    G-->>API: PASS + audit record
+    API->>DB: persist OriginalityCheck
+    API->>DB: create Publication (scheduled)
+    API-->>UI: scheduled
+
+    SCH->>API: due publications
+    API->>YT: videos.insert (~100 units)
+    YT-->>API: videoId
+    API->>YT: set thumbnail, captions
+    API->>YT: set disclosure flag
+    API->>DB: mark published
+
+    opt quota exceeded
+      YT-->>API: 403 quotaExceeded
+      API->>API: exponential backoff, requeue
+    end
+  end

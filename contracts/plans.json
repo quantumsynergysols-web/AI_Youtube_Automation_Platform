@@ -1,0 +1,57 @@
+{
+  "currency": "USD",
+  "fxNote": "PKR figures in the SRS use 278.05 PKR/USD, interbank 17 Aug 2026",
+  "overagePerVideoUsd": 0.6,
+  "plans": [
+    {
+      "id": "free",
+      "name": "Free",
+      "priceUsd": 0,
+      "videosPerMonth": 3,
+      "channels": 1,
+      "maxDurationSec": 90,
+      "watermark": true,
+      "canPublish": false
+    },
+    {
+      "id": "starter",
+      "name": "Starter",
+      "priceUsd": 29,
+      "videosPerMonth": 10,
+      "channels": 1,
+      "maxDurationSec": 90,
+      "watermark": false,
+      "canPublish": true
+    },
+    {
+      "id": "creator",
+      "name": "Creator",
+      "priceUsd": 79,
+      "videosPerMonth": 30,
+      "channels": 1,
+      "maxDurationSec": 90,
+      "watermark": false,
+      "canPublish": true
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "priceUsd": 199,
+      "videosPerMonth": 90,
+      "channels": 3,
+      "maxDurationSec": 90,
+      "watermark": false,
+      "canPublish": true
+    },
+    {
+      "id": "studio",
+      "name": "Studio",
+      "priceUsd": 399,
+      "videosPerMonth": 200,
+      "channels": 10,
+      "maxDurationSec": 90,
+      "watermark": false,
+      "canPublish": true
+    }
+  ]
+}

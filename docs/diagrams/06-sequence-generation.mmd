@@ -1,0 +1,46 @@
+sequenceDiagram
+  actor C as Creator
+  participant UI as Web app
+  participant API as API service
+  participant Q as Job queue
+  participant W as Worker
+  participant LLM as LLM
+  participant T as TTS
+  participant I as Image / video
+  participant S as Storage
+
+  C->>UI: choose topic
+  UI->>API: POST /projects
+  API->>API: check plan allowance
+  API-->>UI: 402 if exhausted
+  API->>Q: enqueue SCRIPT
+  Q->>W: lease SCRIPT
+  W->>LLM: script + art direction + scenes
+  LLM-->>W: structured JSON
+  W->>API: script ready
+  API-->>UI: notify
+
+  Note over C,UI: Human checkpoint 1
+  C->>UI: edit hook, add commentary
+  UI->>API: approve script
+  API->>Q: enqueue MEDIA
+
+  Q->>W: lease MEDIA
+  W->>T: narration
+  T-->>W: audio + word timings
+  par scenes in parallel
+    W->>I: still, locked seed
+    I-->>W: image
+  and
+    W->>I: animate hero scenes
+    I-->>W: clips
+  end
+  W->>W: assemble, burn captions, encode
+  W->>S: put 1080p renders
+  W->>LLM: title, description, tags
+  LLM-->>W: metadata
+  W->>API: complete + cost
+  API-->>UI: ready for review
+
+  Note over C,UI: Human checkpoint 2
+  C->>UI: pick title and thumbnail

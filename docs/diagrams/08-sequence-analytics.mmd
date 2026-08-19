@@ -1,0 +1,22 @@
+sequenceDiagram
+  participant CRON as Nightly poller
+  participant API as API service
+  participant YT as YouTube Analytics
+  participant DB as Database
+  participant REC as Recommender
+  actor C as Creator
+
+  CRON->>API: run daily ingest
+  loop each published video
+    API->>YT: views, CTR, duration, retention
+    YT-->>API: metrics
+    API->>DB: store MetricSnapshot
+  end
+  API->>REC: recompute channel baseline
+  REC->>DB: read snapshots + scene breakdowns
+  REC->>REC: locate retention drop-off per scene
+  REC->>REC: correlate hooks and titles with CTR
+  REC->>DB: write recommendations
+  C->>API: open dashboard
+  API-->>C: performance vs baseline + next topics
+  Note over REC,C: learned preferences feed the next script

@@ -1,0 +1,1130 @@
+<title>Architecture &amp; Delivery Method</title>
+<style>
+  :root{
+    --ground:#F4F6F9;
+    --surface:#FFFFFF;
+    --surface-2:#EAEFF4;
+    --ink:#11161E;
+    --ink-2:#3A4654;
+    --muted:#68758A;
+    --rule:#D8DFE8;
+    --rule-strong:#BCC7D4;
+    --accent:#0E7C86;
+    --gate:#B0771A;
+    --gate-bg:#F7EAD2;
+    --ok:#2A6E47;
+    --ok-bg:#DCEFE3;
+    --stop:#A32D22;
+    --stop-bg:#F7DFDC;
+    --paper:#F7F9FB;
+    --paper-rule:#C8D3DE;
+    --display:"Segoe UI Variable Display","Segoe UI",system-ui,-apple-system,sans-serif;
+    --body:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",sans-serif;
+    --mono:"Cascadia Mono",ui-monospace,Consolas,"SF Mono",monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0C1016;
+      --surface:#141A22;
+      --surface-2:#1B232D;
+      --ink:#E3E9F0;
+      --ink-2:#B6C1CE;
+      --muted:#8695A8;
+      --rule:#27313D;
+      --rule-strong:#3B4857;
+      --accent:#3FD0DC;
+      --gate:#E0B160;
+      --gate-bg:#33270F;
+      --ok:#68C793;
+      --ok-bg:#122E20;
+      --stop:#F09186;
+      --stop-bg:#361713;
+      --paper:#EDF1F5;
+      --paper-rule:#A9B7C6;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C1016;
+    --surface:#141A22;
+    --surface-2:#1B232D;
+    --ink:#E3E9F0;
+    --ink-2:#B6C1CE;
+    --muted:#8695A8;
+    --rule:#27313D;
+    --rule-strong:#3B4857;
+    --accent:#3FD0DC;
+    --gate:#E0B160;
+    --gate-bg:#33270F;
+    --ok:#68C793;
+    --ok-bg:#122E20;
+    --stop:#F09186;
+    --stop-bg:#361713;
+    --paper:#EDF1F5;
+    --paper-rule:#A9B7C6;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    background:var(--ground);color:var(--ink);
+    font-family:var(--body);font-size:16.5px;line-height:1.62;
+    margin:0;padding:0 20px 96px;-webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column}
+  .wide{max-width:1020px;margin-left:auto;margin-right:auto;width:100%}
+
+  h1,h2,h3,h4,.eyebrow,.pill,.num,th{font-family:var(--display)}
+
+  header.head{padding:72px 0 36px;display:flex;flex-direction:column;gap:18px}
+  .eyebrow{
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);display:flex;flex-wrap:wrap;gap:9px;align-items:center;
+  }
+  .eyebrow i{font-style:normal;color:var(--rule-strong)}
+  h1{font-size:clamp(33px,5.6vw,47px);line-height:1.07;letter-spacing:-.022em;
+     font-weight:700;margin:0;text-wrap:balance}
+  .standfirst{font-size:18.5px;line-height:1.58;color:var(--ink-2);margin:0;max-width:62ch}
+
+  .partmark{
+    display:flex;align-items:baseline;gap:14px;margin-top:64px;padding-bottom:10px;
+    border-bottom:2px solid var(--accent);
+  }
+  .partmark span{font-family:var(--mono);font-size:11.5px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--accent)}
+  .partmark h2{font-size:28px;letter-spacing:-.018em;font-weight:680;margin:0;color:var(--ink)}
+
+  h3{font-size:21px;line-height:1.24;letter-spacing:-.012em;font-weight:660;margin:44px 0 6px;
+     color:var(--ink);text-wrap:balance}
+  h4{font-size:16px;font-weight:660;margin:26px 0 4px;color:var(--ink)}
+  p{margin:0 0 14px;color:var(--ink-2)}
+  p:last-child{margin-bottom:0}
+  p strong,li strong{color:var(--ink);font-weight:650}
+  em{font-style:italic}
+  code{font-family:var(--mono);font-size:.85em;background:var(--surface-2);
+    padding:1px 5px;border-radius:2px;color:var(--ink)}
+  a{color:var(--accent);text-underline-offset:2px}
+  a:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:2px}
+
+  ul{margin:0 0 14px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+  ul li{position:relative;padding-left:19px;color:var(--ink-2)}
+  ul li::before{content:"";position:absolute;left:2px;top:.62em;width:6px;height:6px;
+    background:var(--rule-strong);border-radius:50%}
+
+  /* diagram canvas — mermaid cannot be made reliably theme-responsive, so every
+     generated drawing sits on a fixed light panel, like paper on a desk. */
+  figure{margin:22px 0 8px;display:flex;flex-direction:column;gap:0}
+  .canvas{
+    background:var(--paper);border:1px solid var(--paper-rule);border-radius:4px;
+    padding:22px 18px;overflow-x:auto;
+  }
+  .canvas .mermaid{display:flex;justify-content:center;min-width:min-content}
+  figcaption{font-size:13.5px;color:var(--muted);line-height:1.5;padding:10px 2px 0;
+    border-top:1px solid var(--rule);margin-top:10px}
+  figcaption b{color:var(--ink-2);font-weight:650}
+
+  svg.drawn{display:block;width:100%;height:auto;color:var(--ink)}
+
+  .scroll{overflow-x:auto;border:1px solid var(--rule);border-radius:3px;
+    background:var(--surface);margin:18px 0 8px}
+  table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+  th,td{padding:10px 15px;text-align:left;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{font-size:11px;letter-spacing:.11em;text-transform:uppercase;font-weight:640;
+     color:var(--muted);background:var(--surface-2);white-space:nowrap}
+  td{color:var(--ink-2)}
+  tbody tr:last-child td{border-bottom:none}
+  tr.win td{background:var(--ok-bg)}
+  tr.win td:first-child{font-weight:700;color:var(--ink)}
+
+  .pill{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:660;
+    padding:3px 8px;border-radius:2px;white-space:nowrap;display:inline-block}
+  .p-no{background:var(--stop-bg);color:var(--stop)}
+  .p-part{background:var(--gate-bg);color:var(--gate)}
+  .p-yes{background:var(--ok-bg);color:var(--ok)}
+
+  .verdict{
+    background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--accent);
+    border-radius:3px;padding:26px 28px;display:flex;flex-direction:column;gap:13px;margin:26px 0 8px;
+  }
+  .verdict .tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent)}
+  .verdict .lede{font-family:var(--display);font-size:clamp(20px,3.2vw,25px);line-height:1.32;
+    letter-spacing:-.012em;font-weight:640;margin:0;color:var(--ink);text-wrap:balance}
+  .verdict p{margin:0;font-size:16px}
+
+  .keyline{border-left:3px solid var(--accent);padding:3px 0 3px 18px;margin:20px 0;
+    font-family:var(--display);font-size:17.5px;line-height:1.44;color:var(--ink);
+    font-weight:600;text-wrap:balance}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:0;
+    border-top:1px solid var(--rule-strong);margin:18px 0 8px}
+  .cards > div{border-bottom:1px solid var(--rule);padding:15px 16px 15px 0}
+  .cards b{display:block;font-family:var(--display);font-weight:650;color:var(--ink);
+    font-size:15.5px;margin-bottom:3px}
+  .cards span{font-size:14px;color:var(--muted);line-height:1.5}
+
+  footer{padding-top:52px;margin-top:52px;border-top:1px solid var(--rule)}
+  footer p{font-size:13.5px;color:var(--muted)}
+
+  @media (max-width:560px){
+    body{font-size:15.5px;padding:0 15px 64px}
+    header.head{padding:46px 0 26px}
+    .verdict{padding:22px 18px}
+    .canvas{padding:14px 10px}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="head">
+    <div class="eyebrow">
+      <span>Design note</span><i>/</i><span>19 August 2026</span><i>/</i><span>Standalone product</span>
+    </div>
+    <h1>Architecture &amp; Delivery Method</h1>
+    <p class="standfirst">
+      The system design for the AI YouTube automation platform, expressed as UML, and a reasoned
+      choice of software engineering method for the 17-week build. Companion to the SRS v1.1.
+    </p>
+  </header>
+
+  <div class="partmark"><span>Part 1</span><h2>Architecture</h2></div>
+
+  <h3>1.1 Deployment view</h3>
+  <p>
+    The product is standalone, so nothing is shared with Quantum Framer at runtime. It has its own
+    VPS, its own database, its own storage bucket and its own Stripe account. The single most
+    important structural decision is visible here: <strong>topic research goes to a third-party data
+    vendor, not to the YouTube API</strong>. Sending research through YouTube would cap the whole
+    platform at roughly 15 videos a day regardless of how many customers sign up.
+  </p>
+
+  <figure class="wide">
+    <svg class="drawn" viewBox="0 86 940 406" role="img" aria-label="Deployment view. The creator browser calls an API service running on the product's own VPS, which enqueues work to a Redis queue consumed by a Python generation worker. The VPS tier reads and writes its own PostgreSQL and object storage, and the browser fetches finished video by signed URL. The worker calls generation providers for script, narration and visuals. Separately the API service calls a third-party channel data vendor for topic research, and reserves the YouTube API for publishing and metrics only.">
+      <defs>
+        <marker id="dpA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="dpB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <g font-family="monospace" font-size="10.5" fill="currentColor" opacity="0.55" letter-spacing="1.2">
+        <text x="22" y="140">CLIENT</text>
+        <text x="215" y="100">OWN VPS &#183; DOCKER COMPOSE</text>
+        <text x="215" y="340">OWN MANAGED DATA</text>
+        <text x="560" y="100">EXTERNAL SERVICES</text>
+      </g>
+
+      <rect x="215" y="110" width="270" height="212" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="215" y="110" width="270" height="212" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+      <rect x="215" y="350" width="270" height="110" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="215" y="350" width="270" height="110" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+      <rect x="560" y="110" width="350" height="320" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="560" y="110" width="350" height="320" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+
+      <g stroke="currentColor" stroke-width="1.1" opacity="0.45" fill="currentColor" fill-opacity="0.09">
+        <rect x="22"  y="150" width="168" height="58" rx="3"/>
+        <rect x="240" y="135" width="220" height="50" rx="3"/>
+        <rect x="240" y="205" width="220" height="42" rx="3"/>
+        <rect x="240" y="265" width="220" height="46" rx="3"/>
+        <rect x="238" y="378" width="105" height="46" rx="3"/>
+        <rect x="357" y="378" width="105" height="46" rx="3"/>
+        <rect x="592" y="325" width="140" height="36" rx="3"/>
+        <rect x="746" y="325" width="133" height="36" rx="3"/>
+        <rect x="592" y="369" width="287" height="32" rx="3"/>
+        <rect x="578" y="246" width="315" height="38" rx="3"/>
+      </g>
+
+      <rect x="578" y="300" width="315" height="112" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.35"/>
+      <text x="586" y="316" font-family="monospace" font-size="9.5" fill="currentColor" opacity="0.5" letter-spacing="1">GENERATION PROVIDERS</text>
+
+      <rect x="578" y="130" width="315" height="46" rx="3" fill="var(--accent)" fill-opacity="0.14" stroke="var(--accent)" stroke-width="1.2"/>
+      <rect x="578" y="186" width="315" height="50" rx="3" fill="var(--accent)" fill-opacity="0.14" stroke="var(--accent)" stroke-width="1.2"/>
+
+      <g font-size="12" fill="currentColor" text-anchor="middle">
+        <text x="106" y="174">Creator browser</text>
+        <text x="106" y="191" font-size="10.5" opacity="0.7">React + Vite SPA</text>
+        <text x="350" y="156">API service</text>
+        <text x="350" y="173" font-size="10.5" opacity="0.7">Node + Express</text>
+        <text x="350" y="231">Redis job queue</text>
+        <text x="350" y="285">Generation worker</text>
+        <text x="350" y="301" font-size="10.5" opacity="0.7">Python</text>
+        <text x="290" y="406">PostgreSQL</text>
+        <text x="409" y="399">Object store</text>
+        <text x="409" y="414" font-size="10.5" opacity="0.7">+ CDN</text>
+        <text x="662" y="348">LLM</text>
+        <text x="812" y="348">TTS</text>
+        <text x="735" y="390">Image + video models</text>
+        <text x="735" y="270">Stripe</text>
+        <text x="735" y="149">Channel data vendor</text>
+        <text x="735" y="165" font-size="10.5" opacity="0.75">topic + competitor research</text>
+        <text x="735" y="206">YouTube Data + Analytics API</text>
+        <text x="735" y="222" font-size="10.5" opacity="0.75">publish and metrics only</text>
+      </g>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.75" marker-end="url(#dpA)">
+        <path d="M 190 172 L 235 163"/>
+        <path d="M 350 185 L 350 200"/>
+        <path d="M 350 247 L 350 260"/>
+        <path d="M 350 322 L 350 345"/>
+        <path d="M 106 208 L 106 470 L 409 470 L 409 429"/>
+        <path d="M 460 288 C 512 288, 522 340, 573 350"/>
+      </g>
+
+      <g fill="none" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#dpB)">
+        <path d="M 460 150 L 573 152"/>
+        <path d="M 460 170 C 508 170, 524 198, 573 208"/>
+      </g>
+      <path d="M 460 180 C 500 180, 534 248, 573 262" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6" marker-end="url(#dpA)"/>
+
+      <g font-size="10.5" fill="currentColor" opacity="0.85">
+        <text x="213" y="153" text-anchor="middle">REST</text>
+        <text x="358" y="199">enqueue</text>
+        <text x="358" y="259">lease</text>
+        <text x="358" y="339">read / write</text>
+        <text x="257" y="484" text-anchor="middle">finished video by signed URL</text>
+        <text x="503" y="326" text-anchor="middle">generation calls</text>
+        <text x="512" y="256" text-anchor="middle">billing</text>
+      </g>
+      <g font-size="10.5" fill="var(--accent)" font-weight="600">
+        <text x="516" y="143" text-anchor="middle">topic research</text>
+        <text x="534" y="185" text-anchor="middle">publish + metrics</text>
+      </g>
+    </svg>
+    <figcaption>
+      <b>Deployment view.</b> The two teal paths are the decision that matters. Topic research goes
+      to a third-party vendor, and the YouTube API is reserved for publishing and metrics. Routing
+      research through YouTube instead would consume 100 quota units per search and cap the entire
+      platform at roughly 15 videos a day, no matter how many customers sign up. The worker never
+      touches YouTube; only the API service holds that quota.
+    </figcaption>
+  </figure>
+
+  <h3>1.2 Component view</h3>
+  <p>
+    Every external provider sits behind an adapter. That is not architectural decoration — provider
+    pricing moved materially in the last year, and the SRS commits to substitutability as a
+    non-functional requirement. The Originality Guard is drawn on the critical path on purpose: it
+    is a gate, not a report.
+  </p>
+
+  <figure class="wide">
+    <svg class="drawn" viewBox="0 20 940 520" role="img" aria-label="Component view in six tiers. A web application sits above four application services: auth, channel manager, project orchestrator and billing. Below them the generation domain holds topic research, scriptwriter, voice synthesis, visual generation, assembly and metadata. All output passes through the Originality Guard, which gates publishing. Below that sit the publisher, analytics ingester and feedback recommender, whose output loops back up into the scriptwriter. A provider adapter layer forms the base.">
+      <defs>
+        <marker id="cpA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="cpB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--accent)"/>
+        </marker>
+      </defs>
+
+      <g font-family="monospace" font-size="9.5" fill="currentColor" opacity="0.5" letter-spacing="1.1">
+        <text x="24" y="56">UI</text>
+        <text x="24" y="123">APP</text>
+        <text x="24" y="216">GENERATION</text>
+        <text x="24" y="351">GATE</text>
+        <text x="24" y="433">PUBLISH</text>
+        <text x="24" y="508">ADAPTERS</text>
+      </g>
+
+      <g stroke="currentColor" stroke-width="1.1" opacity="0.45" fill="currentColor" fill-opacity="0.09">
+        <rect x="140" y="30"  width="200" height="42" rx="3"/>
+        <rect x="140" y="97" width="181" height="44" rx="3"/>
+        <rect x="333" y="97" width="181" height="44" rx="3"/>
+        <rect x="526" y="97" width="181" height="44" rx="3"/>
+        <rect x="719" y="97" width="181" height="44" rx="3"/>
+        <rect x="140" y="190" width="230" height="42" rx="3"/>
+        <rect x="405" y="190" width="230" height="42" rx="3"/>
+        <rect x="670" y="190" width="230" height="42" rx="3"/>
+        <rect x="140" y="252" width="230" height="42" rx="3"/>
+        <rect x="405" y="252" width="230" height="42" rx="3"/>
+        <rect x="670" y="252" width="230" height="42" rx="3"/>
+        <rect x="140" y="406" width="230" height="44" rx="3"/>
+        <rect x="405" y="406" width="230" height="44" rx="3"/>
+        <rect x="670" y="406" width="230" height="44" rx="3"/>
+        <rect x="140" y="484" width="760" height="38" rx="3"/>
+      </g>
+
+      <rect x="140" y="320" width="500" height="52" rx="3" fill="var(--accent)" fill-opacity="0.16" stroke="var(--accent)" stroke-width="1.6"/>
+
+      <g font-size="12" fill="currentColor" text-anchor="middle">
+        <text x="240" y="56">Web application</text>
+        <text x="230" y="124">Auth and accounts</text>
+        <text x="423" y="124">Channel manager</text>
+        <text x="616" y="124">Project orchestrator</text>
+        <text x="809" y="124">Billing and quota</text>
+        <text x="255" y="216">Topic research</text>
+        <text x="520" y="216">Scriptwriter + art direction</text>
+        <text x="785" y="216">Voice synthesis</text>
+        <text x="255" y="278">Visual generation</text>
+        <text x="520" y="278">Assembly + captions</text>
+        <text x="785" y="278">Metadata + thumbnails</text>
+        <text x="255" y="433">Publisher + scheduler</text>
+        <text x="520" y="433">Analytics ingester</text>
+        <text x="785" y="433">Feedback recommender</text>
+        <text x="520" y="508" font-size="11.5">Provider adapters &#183; LLM &#183; TTS &#183; image &#183; video &#183; data vendor &#183; YouTube &#183; Stripe</text>
+      </g>
+      <text x="390" y="342" font-size="13.5" font-weight="700" fill="currentColor" text-anchor="middle">Originality Guard</text>
+      <text x="390" y="358" font-size="10.5" fill="currentColor" opacity="0.8" text-anchor="middle">publish gate &#183; blocks near-duplicates</text>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.7" marker-end="url(#cpA)">
+        <path d="M 240 72 L 240 92"/>
+        <path d="M 616 141 L 616 185"/>
+        <path d="M 370 211 L 400 211"/>
+        <path d="M 635 211 L 665 211"/>
+        <path d="M 370 273 L 400 273"/>
+        <path d="M 635 273 L 665 273"/>
+        <path d="M 470 232 L 302 250"/>
+        <path d="M 785 232 L 572 250"/>
+        <path d="M 785 294 C 785 312, 520 308, 400 316"/>
+        <path d="M 255 372 L 255 401"/>
+        <path d="M 370 428 L 400 428"/>
+        <path d="M 635 428 L 665 428"/>
+      </g>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.1" opacity="0.4" stroke-dasharray="4 3">
+        <path d="M 255 450 L 255 482"/>
+        <path d="M 520 450 L 520 482"/>
+        <path d="M 785 450 L 785 482"/>
+      </g>
+
+      <path d="M 140 346 L 104 346 L 104 51 L 136 51" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55" stroke-dasharray="5 3" marker-end="url(#cpA)"/>
+      <text x="112" y="240" font-size="10" fill="currentColor" opacity="0.7" transform="rotate(-90 112 240)" text-anchor="middle">blocked, with remedy</text>
+
+      <path d="M 900 428 L 920 428 L 920 168 L 520 168 L 520 185" fill="none" stroke="var(--accent)" stroke-width="2" marker-end="url(#cpB)"/>
+      <text x="716" y="161" font-size="11" fill="var(--accent)" font-weight="600" text-anchor="middle">learned preferences feed the next script</text>
+
+      <g font-size="10.5" fill="currentColor" opacity="0.85">
+        <text x="386" y="207" text-anchor="middle">brief</text>
+        <text x="650" y="207" text-anchor="middle">script</text>
+        <text x="386" y="269" text-anchor="middle">stills</text>
+        <text x="650" y="269" text-anchor="middle">render</text>
+        <text x="368" y="247" text-anchor="middle">art direction</text>
+        <text x="664" y="247" text-anchor="middle">word timings</text>
+        <text x="263" y="392" text-anchor="middle">pass</text>
+        <text x="386" y="423" text-anchor="middle">published</text>
+        <text x="650" y="423" text-anchor="middle">metrics</text>
+      </g>
+    </svg>
+    <figcaption>
+      <b>Component view.</b> The teal loop from <b>Feedback recommender</b> back into
+      <b>Scriptwriter</b> is the only edge on this diagram that competing tools do not have — it is
+      what turns a generator into a system that improves. The Originality Guard sits across the
+      full width of the path because nothing reaches the publisher without passing it. Dashed
+      verticals mark the adapter layer, through which every external call is routed so no single
+      provider is load-bearing.
+    </figcaption>
+  </figure>
+
+  <div class="partmark"><span>Part 2</span><h2>UML models</h2></div>
+
+  <h3>2.1 Use cases</h3>
+  <p>
+    Three actors, plus two that are easy to forget: the scheduler that fires publications and the
+    nightly job that pulls metrics. Both are system actors with no human trigger, and both carry
+    real failure modes.
+  </p>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+flowchart LR
+  CR(["Creator"])
+  AD(["Administrator"])
+  SCHED(["Scheduler&lt;br/&gt;system actor"])
+  METRICS(["Metric poller&lt;br/&gt;system actor"])
+  YT(["YouTube&lt;br/&gt;external"])
+
+  U1["Connect channel"]
+  U2["Choose or accept topic"]
+  U3["Review and edit hook"]
+  U4["Add original commentary"]
+  U5["Generate video"]
+  U6["Pick title and thumbnail"]
+  U7["Schedule publication"]
+  U8["Review performance"]
+  U9["Manage subscription"]
+  U10["Publish queued video"]
+  U11["Ingest channel metrics"]
+  U12["Recommend next topics"]
+  U13["Suspend account on cost ceiling"]
+  U14["Re-run failed job"]
+
+  CR --- U1
+  CR --- U2
+  CR --- U3
+  CR --- U4
+  CR --- U5
+  CR --- U6
+  CR --- U7
+  CR --- U8
+  CR --- U9
+  SCHED --- U10
+  METRICS --- U11
+  U11 --&gt; U12
+  AD --- U13
+  AD --- U14
+  U1 --- YT
+  U10 --- YT
+  U11 --- YT
+</pre>
+    </div>
+    <figcaption>
+      <b>Use case diagram.</b> <code>Review and edit hook</code> and <code>Add original
+      commentary</code> are mandatory, not optional conveniences — they are what makes the output
+      defensible under YouTube's Inauthentic Content policy.
+    </figcaption>
+  </figure>
+
+  <h3>2.2 Domain model</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+classDiagram
+  class User {
+    +UUID id
+    +String email
+    +String locale
+    +Status status
+    +register()
+    +deleteAccount()
+  }
+  class Subscription {
+    +Plan plan
+    +int videosUsed
+    +Date periodEnd
+    +hasAllowance() bool
+    +consume(n)
+  }
+  class Channel {
+    +String youtubeChannelId
+    +String title
+    +bytes oauthTokenEnc
+    +refreshToken()
+    +revoke()
+  }
+  class Project {
+    +String topic
+    +int targetDurationSec
+    +String language
+    +ProjectState state
+    +start()
+    +cancel()
+  }
+  class Script {
+    +String artDirection
+    +String hook
+    +int wordCount
+    +Date humanEditedAt
+    +isHumanApproved() bool
+  }
+  class Scene {
+    +int ordinal
+    +String prompt
+    +int startMs
+    +int endMs
+  }
+  class RenderJob {
+    +Stage stage
+    +int attempts
+    +decimal costUsd
+    +retry()
+    +fail(reason)
+  }
+  class Asset {
+    +Kind kind
+    +String storageKey
+    +long bytes
+  }
+  class OriginalityCheck {
+    +float score
+    +UUID duplicateOf
+    +int humanInputMs
+    +Verdict verdict
+    +blocksPublish() bool
+  }
+  class Publication {
+    +String youtubeVideoId
+    +Date scheduledFor
+    +Visibility visibility
+    +publish()
+  }
+  class MetricSnapshot {
+    +int views
+    +float ctr
+    +int avgViewDuration
+    +retentionJson
+  }
+  class UsageRecord {
+    +decimal costUsd
+    +bool billed
+  }
+
+  User "1" --&gt; "1" Subscription
+  User "1" --&gt; "*" Channel
+  User "1" --&gt; "*" Project
+  Channel "1" --&gt; "*" Project
+  Project "1" --&gt; "1" Script
+  Script "1" --&gt; "*" Scene
+  Project "1" --&gt; "*" RenderJob
+  Project "1" --&gt; "*" Asset
+  Project "1" --&gt; "1" OriginalityCheck
+  Project "1" --&gt; "0..1" Publication
+  Publication "1" --&gt; "*" MetricSnapshot
+  Project "1" --&gt; "*" UsageRecord
+</pre>
+    </div>
+    <figcaption>
+      <b>Domain class diagram.</b> <code>OriginalityCheck</code> has a 1:1 relationship with
+      <code>Project</code> and its <code>blocksPublish()</code> is consulted before
+      <code>Publication</code> can be created — the gate is enforced by the model, not by UI
+      convention.
+    </figcaption>
+  </figure>
+
+  <h3>2.3 Data model</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+erDiagram
+  USER ||--|| SUBSCRIPTION : holds
+  USER ||--o{ CHANNEL : connects
+  USER ||--o{ PROJECT : owns
+  CHANNEL ||--o{ PROJECT : targets
+  PROJECT ||--|| SCRIPT : has
+  SCRIPT ||--o{ SCENE : contains
+  PROJECT ||--o{ RENDERJOB : runs
+  PROJECT ||--o{ ASSET : produces
+  PROJECT ||--|| ORIGINALITYCHECK : gated_by
+  PROJECT ||--o| PUBLICATION : yields
+  PUBLICATION ||--o{ METRICSNAPSHOT : measured_by
+  PROJECT ||--o{ USAGERECORD : bills
+
+  USER {
+    uuid id PK
+    string email UK
+    string password_hash
+    string locale
+    string status
+  }
+  SUBSCRIPTION {
+    uuid id PK
+    uuid user_id FK
+    string stripe_customer_id
+    string plan
+    int videos_used
+    date period_end
+  }
+  CHANNEL {
+    uuid id PK
+    uuid user_id FK
+    string youtube_channel_id
+    bytea oauth_token_enc
+    bytea refresh_token_enc
+  }
+  PROJECT {
+    uuid id PK
+    uuid channel_id FK
+    string topic
+    int target_duration
+    string state
+  }
+  SCRIPT {
+    uuid id PK
+    uuid project_id FK
+    text art_direction
+    text hook
+    timestamp human_edited_at
+  }
+  SCENE {
+    uuid id PK
+    uuid script_id FK
+    int ordinal
+    text prompt
+    int start_ms
+  }
+  RENDERJOB {
+    uuid id PK
+    uuid project_id FK
+    string stage
+    int attempts
+    decimal cost_usd
+  }
+  ORIGINALITYCHECK {
+    uuid id PK
+    uuid project_id FK
+    float score
+    uuid duplicate_of FK
+    int human_input_ms
+    string verdict
+  }
+  PUBLICATION {
+    uuid id PK
+    uuid project_id FK
+    string youtube_video_id
+    timestamp scheduled_for
+    string state
+  }
+  METRICSNAPSHOT {
+    uuid id PK
+    uuid publication_id FK
+    timestamp captured_at
+    int views
+    float ctr
+  }
+</pre>
+    </div>
+    <figcaption>
+      <b>Entity relationship diagram.</b> OAuth tokens are stored as <code>bytea</code> because the
+      SRS requires AES-256 encryption at rest; they are never held as plain text.
+    </figcaption>
+  </figure>
+
+  <h3>2.4 Generating a video</h3>
+  <p>
+    The path that costs money. Note the two synchronous stops for human input, and that scenes are
+    rendered in parallel with a per-scene timeout — a lesson carried over from Quantum Framer, where
+    sequential rendering produced hour-long stalls.
+  </p>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+sequenceDiagram
+  actor C as Creator
+  participant UI as Web app
+  participant API as API service
+  participant Q as Job queue
+  participant W as Worker
+  participant LLM as LLM
+  participant T as TTS
+  participant I as Image / video
+  participant S as Storage
+
+  C-&gt;&gt;UI: choose topic
+  UI-&gt;&gt;API: POST /projects
+  API-&gt;&gt;API: check plan allowance
+  API--&gt;&gt;UI: 402 if exhausted
+  API-&gt;&gt;Q: enqueue SCRIPT
+  Q-&gt;&gt;W: lease SCRIPT
+  W-&gt;&gt;LLM: script + art direction + scenes
+  LLM--&gt;&gt;W: structured JSON
+  W-&gt;&gt;API: script ready
+  API--&gt;&gt;UI: notify
+
+  Note over C,UI: Human checkpoint 1
+  C-&gt;&gt;UI: edit hook, add commentary
+  UI-&gt;&gt;API: approve script
+  API-&gt;&gt;Q: enqueue MEDIA
+
+  Q-&gt;&gt;W: lease MEDIA
+  W-&gt;&gt;T: narration
+  T--&gt;&gt;W: audio + word timings
+  par scenes in parallel
+    W-&gt;&gt;I: still, locked seed
+    I--&gt;&gt;W: image
+  and
+    W-&gt;&gt;I: animate hero scenes
+    I--&gt;&gt;W: clips
+  end
+  W-&gt;&gt;W: assemble, burn captions, encode
+  W-&gt;&gt;S: put 1080p renders
+  W-&gt;&gt;LLM: title, description, tags
+  LLM--&gt;&gt;W: metadata
+  W-&gt;&gt;API: complete + cost
+  API--&gt;&gt;UI: ready for review
+
+  Note over C,UI: Human checkpoint 2
+  C-&gt;&gt;UI: pick title and thumbnail
+</pre>
+    </div>
+    <figcaption>
+      <b>Sequence: generation.</b> The allowance check happens before any paid provider is called,
+      so an out-of-quota account never incurs cost.
+    </figcaption>
+  </figure>
+
+  <h3>2.5 Publishing through the guard</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+sequenceDiagram
+  actor C as Creator
+  participant UI as Web app
+  participant API as API service
+  participant G as Originality Guard
+  participant DB as Database
+  participant SCH as Scheduler
+  participant YT as YouTube API
+
+  C-&gt;&gt;UI: request publish
+  UI-&gt;&gt;API: POST /publications
+  API-&gt;&gt;G: evaluate(project)
+  G-&gt;&gt;DB: fetch channel back catalogue
+  DB--&gt;&gt;G: prior scripts + embeddings
+  G-&gt;&gt;G: similarity, human input time, template check
+
+  alt score below threshold
+    G--&gt;&gt;API: BLOCKED + reason
+    API--&gt;&gt;UI: publish disabled, remedy shown
+    UI--&gt;&gt;C: "add original commentary"
+  else score acceptable
+    G--&gt;&gt;API: PASS + audit record
+    API-&gt;&gt;DB: persist OriginalityCheck
+    API-&gt;&gt;DB: create Publication (scheduled)
+    API--&gt;&gt;UI: scheduled
+
+    SCH-&gt;&gt;API: due publications
+    API-&gt;&gt;YT: videos.insert (~100 units)
+    YT--&gt;&gt;API: videoId
+    API-&gt;&gt;YT: set thumbnail, captions
+    API-&gt;&gt;YT: set disclosure flag
+    API-&gt;&gt;DB: mark published
+
+    opt quota exceeded
+      YT--&gt;&gt;API: 403 quotaExceeded
+      API-&gt;&gt;API: exponential backoff, requeue
+    end
+  end
+</pre>
+    </div>
+    <figcaption>
+      <b>Sequence: publish.</b> The guard runs server-side before a <code>Publication</code> row
+      exists. A blocked video cannot be published by manipulating the client.
+    </figcaption>
+  </figure>
+
+  <h3>2.6 The feedback loop</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+sequenceDiagram
+  participant CRON as Nightly poller
+  participant API as API service
+  participant YT as YouTube Analytics
+  participant DB as Database
+  participant REC as Recommender
+  actor C as Creator
+
+  CRON-&gt;&gt;API: run daily ingest
+  loop each published video
+    API-&gt;&gt;YT: views, CTR, duration, retention
+    YT--&gt;&gt;API: metrics
+    API-&gt;&gt;DB: store MetricSnapshot
+  end
+  API-&gt;&gt;REC: recompute channel baseline
+  REC-&gt;&gt;DB: read snapshots + scene breakdowns
+  REC-&gt;&gt;REC: locate retention drop-off per scene
+  REC-&gt;&gt;REC: correlate hooks and titles with CTR
+  REC-&gt;&gt;DB: write recommendations
+  C-&gt;&gt;API: open dashboard
+  API--&gt;&gt;C: performance vs baseline + next topics
+  Note over REC,C: learned preferences feed the next script
+</pre>
+    </div>
+    <figcaption>
+      <b>Sequence: analytics loop.</b> This needs 60–90 days of channel history before its
+      recommendations carry weight, which is why the delivery plan schedules it last but the pitch
+      must set expectations for it early.
+    </figcaption>
+  </figure>
+
+  <h3>2.7 Creator workflow</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+flowchart TD
+  ST([Start]) --&gt; A["Select niche and topic"]
+  A --&gt; B{"Allowance&lt;br/&gt;remaining?"}
+  B --&gt;|no| UP["Upgrade or buy overage"] --&gt; B
+  B --&gt;|yes| C["Generate script + art direction"]
+  C --&gt; D["/ Review hook /"]
+  D --&gt; E{"Approved?"}
+  E --&gt;|edit| C
+  E --&gt;|yes| F["/ Add original commentary /"]
+  F --&gt; G["Synthesise narration"]
+  G --&gt; H["Generate stills and clips"]
+  H --&gt; I["Assemble, caption, encode"]
+  I --&gt; J["Generate metadata + thumbnails"]
+  J --&gt; K{"Originality&lt;br/&gt;Guard"}
+  K --&gt;|blocked| L["Show remedy"] --&gt; F
+  K --&gt;|pass| M["/ Choose title and thumbnail /"]
+  M --&gt; N{"Publish now&lt;br/&gt;or schedule?"}
+  N --&gt;|download only| O([Download])
+  N --&gt;|schedule| P["Queue for upload"]
+  P --&gt; Q["Upload to YouTube"]
+  Q --&gt; R["Collect metrics"]
+  R --&gt; S["Recommend next topic"]
+  S --&gt; A
+</pre>
+    </div>
+    <figcaption>
+      <b>Activity diagram.</b> Steps in <code>/ slashes /</code> require a human. The loop from
+      <code>Recommend next topic</code> back to <code>Select niche and topic</code> is what makes
+      this a cycle rather than a one-shot generator.
+    </figcaption>
+  </figure>
+
+  <h3>2.8 Lifecycle states</h3>
+
+  <figure class="wide">
+    <div class="canvas">
+<pre class="mermaid">
+stateDiagram-v2
+  [*] --&gt; Draft
+  Draft --&gt; Scripting : topic confirmed
+  Scripting --&gt; AwaitingApproval : script generated
+  AwaitingApproval --&gt; Scripting : creator requests rewrite
+  AwaitingApproval --&gt; Rendering : hook approved + commentary added
+  Rendering --&gt; Rendering : scene retry
+  Rendering --&gt; Failed : attempts exhausted
+  Failed --&gt; Rendering : admin re-run
+  Rendering --&gt; Checking : assembly complete
+  Checking --&gt; Blocked : originality below threshold
+  Blocked --&gt; AwaitingApproval : creator adds original input
+  Checking --&gt; Ready : guard passed
+  Ready --&gt; Scheduled : publication scheduled
+  Ready --&gt; Downloaded : downloaded without publishing
+  Scheduled --&gt; Publishing : scheduled time reached
+  Publishing --&gt; Scheduled : quota backoff
+  Publishing --&gt; Published : upload succeeded
+  Published --&gt; Measuring : first metrics received
+  Measuring --&gt; Measuring : nightly snapshot
+  Downloaded --&gt; [*]
+  Measuring --&gt; [*]
+</pre>
+    </div>
+    <figcaption>
+      <b>State machine: Project.</b> Two self-loops encode the operational realities that cost most
+      in production — per-scene render retry, and backoff when the YouTube quota is exhausted.
+      <code>Blocked</code> returns the creator to the point where they can actually fix the problem.
+    </figcaption>
+  </figure>
+
+  <div class="partmark"><span>Part 3</span><h2>Engineering method</h2></div>
+
+  <div class="verdict">
+    <div class="tag">Recommendation</div>
+    <p class="lede">Iterative-incremental delivery with phase gates, two-week iterations and Kanban flow inside each phase.</p>
+    <p>
+      Not Waterfall, because the environment moves faster than the plan. Not Scrum by the book,
+      because the ceremony assumes a team two to three times this size. The method takes the phase
+      structure the SRS already defines, adds a fixed feedback cadence, and puts a go/no-go decision
+      in the team lead's hands at each boundary.
+    </p>
+  </div>
+
+  <h3>3.1 What the choice actually turns on</h3>
+  <p>
+    Method selection here is not a matter of taste. Four properties of this specific project decide it:
+  </p>
+  <ul>
+    <li><strong>Requirements are stable; the environment is not.</strong> The SRS specifies 55 requirements and they are unlikely to churn. But YouTube's monetisation policy changed in July 2026, upload quota costs changed in December 2025, and video model pricing moved repeatedly through the year. A method that freezes a plan against a moving external world will be wrong by month three.</li>
+    <li><strong>The two riskiest questions are empirical.</strong> Is the generated output good enough that viewers actually watch it? Will established creators pay $79 a month? Neither can be answered by analysis. Both need something real in front of someone, early.</li>
+    <li><strong>The team is small.</strong> Assumed two to four people, with the team lead doubling as product owner and reviewer. Process weight has to be proportionate.</li>
+    <li><strong>The date is fixed but the scope is negotiable.</strong> 17 weeks with P0/P1/P2 priorities already assigned — which is exactly the shape that incremental delivery handles and fixed-scope methods do not.</li>
+  </ul>
+
+  <h3>3.2 Methods considered</h3>
+
+  <div class="scroll wide">
+    <table>
+      <thead>
+        <tr><th>Method</th><th>Fit</th><th>Assessment</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Waterfall</td>
+          <td><span class="pill p-no">Rejected</span></td>
+          <td>Produces no working software until roughly week 14. The quality and pricing questions would stay unanswered until it is too late to change course, and external API behaviour cannot be discovered from a document.</td>
+        </tr>
+        <tr>
+          <td>V-Model</td>
+          <td><span class="pill p-no">Rejected as a whole</span></td>
+          <td>Inherits Waterfall's late feedback and adds test documentation weight a small team cannot carry. <strong>Its verification discipline is borrowed for FR-9 only</strong> — the Originality Guard protects the customer's income, so acceptance tests there are written before the implementation.</td>
+        </tr>
+        <tr>
+          <td>Spiral</td>
+          <td><span class="pill p-part">Partly adopted</span></td>
+          <td>The risk-first instinct is exactly right, but formal risk analysis per cycle is disproportionate to a 17-week build. The risk spike is adopted; the framework is not.</td>
+        </tr>
+        <tr>
+          <td>Scrum, by the book</td>
+          <td><span class="pill p-no">Rejected</span></td>
+          <td>Three roles and five events presuppose five to nine people and a Product Owner distinct from the team. Here one person is lead, owner and reviewer, so the ceremony generates overhead without generating signal.</td>
+        </tr>
+        <tr>
+          <td>Extreme Programming</td>
+          <td><span class="pill p-part">Partly adopted</span></td>
+          <td>Pair programming and an on-site customer are impractical at this size. Continuous integration, small releases, refactoring and test-first on the compliance layer are adopted directly.</td>
+        </tr>
+        <tr>
+          <td>Kanban</td>
+          <td><span class="pill p-part">Partly adopted</span></td>
+          <td>Strong on flow and WIP limits for a small team, weak at committing to a fixed date. Used as the mechanism <em>inside</em> a phase, not as the whole method.</td>
+        </tr>
+        <tr class="win">
+          <td>Iterative-incremental with phase gates</td>
+          <td><span class="pill p-yes">Selected</span></td>
+          <td>Phases 0–6 are already natural increments, each demonstrable. Two-week iterations force a feedback rhythm; gates give explicit go/no-go points. Fits the team size, the fixed date and the negotiable scope, and gets the risky questions answered in the first month.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.3 How it maps onto the 17 weeks</h3>
+  <p>
+    The important structure is not the phase bars — those come from the SRS. It is the two parallel
+    tracks beneath them, and the fact that <strong>both report back before the expensive phase
+    starts</strong>.
+  </p>
+
+  <figure class="wide">
+    <svg class="drawn" viewBox="0 0 900 300" role="img" aria-label="Seventeen week delivery timeline showing seven phases with six gates, a generation quality spike in weeks two to three and pricing validation in weeks four to eight, both feeding decisions before the four-week generation core phase begins.">
+      <defs>
+        <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+      </defs>
+
+      <!-- week ruler -->
+      <line x1="60" y1="34" x2="860" y2="34" stroke="currentColor" stroke-width="1" opacity="0.28"/>
+      <text x="60" y="22" font-size="11" fill="currentColor" opacity="0.6" font-family="monospace">W1</text>
+      <text x="248" y="22" font-size="11" fill="currentColor" opacity="0.6" font-family="monospace">W5</text>
+      <text x="436" y="22" font-size="11" fill="currentColor" opacity="0.6" font-family="monospace">W9</text>
+      <text x="624" y="22" font-size="11" fill="currentColor" opacity="0.6" font-family="monospace">W13</text>
+      <text x="812" y="22" font-size="11" fill="currentColor" opacity="0.6" font-family="monospace">W17</text>
+
+      <!-- phase bars -->
+      <g>
+        <rect x="60"  y="46" width="137" height="34" rx="3" fill="currentColor" opacity="0.10"/>
+        <rect x="201" y="46" width="90"  height="34" rx="3" fill="currentColor" opacity="0.10"/>
+        <rect x="295" y="46" width="184" height="34" rx="3" fill="var(--accent)" opacity="0.22"/>
+        <rect x="483" y="46" width="90"  height="34" rx="3" fill="currentColor" opacity="0.10"/>
+        <rect x="577" y="46" width="90"  height="34" rx="3" fill="currentColor" opacity="0.10"/>
+        <rect x="671" y="46" width="90"  height="34" rx="3" fill="currentColor" opacity="0.10"/>
+        <rect x="765" y="46" width="94"  height="34" rx="3" fill="currentColor" opacity="0.10"/>
+
+        <text x="128" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P0 Foundation</text>
+        <text x="246" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P1 Channel</text>
+        <text x="387" y="68" font-size="12" text-anchor="middle" fill="currentColor" font-weight="600">P2 Generation core</text>
+        <text x="528" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P3 Metadata</text>
+        <text x="622" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P4 Guard</text>
+        <text x="716" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P5 Publish</text>
+        <text x="812" y="68" font-size="11.5" text-anchor="middle" fill="currentColor">P6 Loop</text>
+      </g>
+
+      <!-- gates -->
+      <g fill="var(--gate)">
+        <polygon points="201,88 208,96 201,104 194,96"/>
+        <polygon points="295,88 302,96 295,104 288,96"/>
+        <polygon points="483,88 490,96 483,104 476,96"/>
+        <polygon points="577,88 584,96 577,104 570,96"/>
+        <polygon points="671,88 678,96 671,104 664,96"/>
+        <polygon points="765,88 772,96 765,104 758,96"/>
+        <polygon points="859,88 866,96 859,104 852,96"/>
+      </g>
+      <text x="201" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G0</text>
+      <text x="295" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G1</text>
+      <text x="483" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G2</text>
+      <text x="577" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G3</text>
+      <text x="671" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G4</text>
+      <text x="765" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G5</text>
+      <text x="859" y="120" font-size="10" text-anchor="middle" fill="var(--gate)" font-family="monospace">G6</text>
+
+      <!-- parallel tracks -->
+      <rect x="107" y="160" width="94" height="28" rx="3" fill="var(--accent)" opacity="0.30"/>
+      <text x="154" y="178" font-size="11" text-anchor="middle" fill="currentColor">Quality spike</text>
+
+      <rect x="201" y="212" width="235" height="28" rx="3" fill="var(--accent)" opacity="0.30"/>
+      <text x="318" y="230" font-size="11" text-anchor="middle" fill="currentColor">Pricing validation, 10 creators</text>
+
+      <!-- feedback arrows into P2 -->
+      <path d="M 201 174 C 250 174, 300 150, 330 86" stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#ah)" opacity="0.75"/>
+      <path d="M 436 226 C 470 226, 470 160, 420 86" stroke="currentColor" stroke-width="1.4" fill="none" marker-end="url(#ah)" opacity="0.75"/>
+
+      <text x="470" y="176" font-size="11" fill="currentColor" opacity="0.85">decides animation density</text>
+      <text x="500" y="248" font-size="11" fill="currentColor" opacity="0.85">decides plan pricing before billing is built</text>
+
+      <!-- legend -->
+      <line x1="60" y1="278" x2="76" y2="278" stroke="currentColor" stroke-width="1.4" opacity="0.75" marker-end="url(#ah)"/>
+      <text x="84" y="282" font-size="10.5" fill="currentColor" opacity="0.7">result feeds a decision</text>
+      <polygon points="248,272 255,280 248,288 241,280" fill="var(--gate)"/>
+      <text x="264" y="284" font-size="10.5" fill="currentColor" opacity="0.7">phase gate: go / no-go, owned by the team lead</text>
+    </svg>
+    <figcaption>
+      <b>Delivery structure.</b> The quality spike runs in weeks 2–3, before Phase 2 commits four
+      weeks of work to a generation pipeline whose output may not be watchable. Pricing validation
+      finishes before billing is built. Both are cheap to run and expensive to skip.
+    </figcaption>
+  </figure>
+
+  <h3>3.4 Gate criteria</h3>
+  <p>
+    A gate is a decision, not a milestone. Each has an exit condition that can be demonstrated, and
+    the team lead can hold, re-scope or proceed.
+  </p>
+
+  <div class="scroll wide">
+    <table>
+      <thead><tr><th>Gate</th><th>Week</th><th>Exit condition</th></tr></thead>
+      <tbody>
+        <tr><td><code>G0</code></td><td>3</td><td>A user signs up, subscribes through Stripe in test mode, and a dummy job runs end to end through the queue.</td></tr>
+        <tr><td><code>G1</code></td><td>5</td><td>A real YouTube channel connects by OAuth, tokens survive a refresh cycle, and history imports.</td></tr>
+        <tr><td><code>G2</code></td><td>9</td><td>A complete short-form video is generated from a topic with no manual steps beyond the two human checkpoints, at a measured cost within 20% of $0.96.</td></tr>
+        <tr><td><code>G3</code></td><td>11</td><td>Metadata, chapters, captions and three thumbnail concepts generate for that video.</td></tr>
+        <tr><td><code>G4</code></td><td>13</td><td>The guard blocks a deliberately duplicated script and passes a genuine one; acceptance tests written before implementation all pass.</td></tr>
+        <tr><td><code>G5</code></td><td>15</td><td>A video uploads and schedules to a real channel, and a forced quota error recovers by backoff without loss.</td></tr>
+        <tr><td><code>G6</code></td><td>17</td><td>Metrics ingest nightly, the dashboard shows performance against baseline, and recommendations generate. Public release.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.5 Practices, scaled to the team</h3>
+  <div class="cards">
+    <div><b>Two-week iterations</b><span>Planning is 45 minutes at the start. No sprint goal theatre — the phase is the goal.</span></div>
+    <div><b>Written async standup</b><span>A short daily note, not a meeting. At this size a meeting costs more than it returns.</span></div>
+    <div><b>Demo at every gate</b><span>Mandatory and non-negotiable. This is the feedback mechanism the whole method exists to protect.</span></div>
+    <div><b>Retrospective at gates only</b><span>30 minutes, seven times across the project, rather than after every iteration.</span></div>
+    <div><b>One ordered backlog</b><span>WIP limit of two items per person. Priorities come from the SRS P0/P1/P2 labels.</span></div>
+    <div><b>CI from day one</b><span>Set up in Phase 0. Every merge builds, tests and deploys to staging.</span></div>
+    <div><b>Test-first on FR-9 only</b><span>The compliance layer gets V-Model rigour because a false pass costs the customer their income.</span></div>
+    <div><b>SRS as baseline</b><span>Changes go to a short change log, not a rewritten document. The SRS is a contract, not a wiki.</span></div>
+  </div>
+
+  <h3>3.6 Definition of done</h3>
+  <p>A requirement is done when all of the following hold — not when the code merges:</p>
+  <ul>
+    <li>Behaviour matches the FR as written, or the FR has been formally amended in the change log.</li>
+    <li>Automated tests cover the success path and the known failure paths, and run in CI.</li>
+    <li>Provider calls go through an adapter, never directly, so the provider stays substitutable.</li>
+    <li>Cost per invocation is recorded to <code>UsageRecord</code> where the operation spends money.</li>
+    <li>Failure states surface to the user with a remedy, and to admin with a cause.</li>
+    <li>It has been demonstrated on staging with real provider credentials, not mocks alone.</li>
+  </ul>
+
+  <h3>3.7 The one thing this method does not solve</h3>
+  <p>
+    Process cannot fix capacity. Risk R-8 in the SRS records that the team is simultaneously
+    committed to Quantum Framer, three weeks into its own build-and-publish window. Two-week
+    iterations will make that collision visible early and honestly, which is worth something — but
+    they will not resolve it.
+  </p>
+  <p class="keyline">
+    The gate structure gives the team lead a legitimate place to stop. If G0 or G2 slips because
+    attention is split, that is the signal to sequence the two products rather than run them
+    concurrently.
+  </p>
+
+  <footer>
+    <p>
+      Companion to <em>AI YouTube Automation Platform — SRS, Proposal and Business Model v1.1</em>.
+      Requirement identifiers (FR-n) and phase numbering follow that document.
+    </p>
+  </footer>
+</div>

@@ -1,0 +1,56 @@
+:root {
+  --ground: #f4f6f9;
+  --surface: #ffffff;
+  --ink: #11161e;
+  --ink-2: #3a4654;
+  --muted: #68758a;
+  --rule: #d8dfe8;
+  --accent: #0e7c86;
+  --ok: #2a6e47;
+  --stop: #a32d22;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ground); color: var(--ink); }
+
+.shell { max-width: 780px; margin: 0 auto; padding: 40px 20px 80px; }
+.card {
+  background: var(--surface); border: 1px solid var(--rule); border-radius: 6px;
+  padding: 26px; display: flex; flex-direction: column; gap: 16px;
+}
+.stack { display: flex; flex-direction: column; gap: 14px; }
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+
+h1 { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.02em; }
+h2 { font-size: 18px; margin: 0; }
+p  { color: var(--ink-2); margin: 0; line-height: 1.55; }
+.muted { color: var(--muted); font-size: 14px; }
+
+label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 600; }
+input {
+  padding: 10px 12px; border: 1px solid var(--rule); border-radius: 4px;
+  font-size: 15px; font-family: inherit; background: var(--surface); color: var(--ink);
+}
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+button {
+  padding: 10px 16px; border-radius: 4px; border: 1px solid var(--accent);
+  background: var(--accent); color: #fff; font-size: 15px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+}
+button.secondary { background: transparent; color: var(--accent); }
+button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+nav { display: flex; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid var(--rule); margin-bottom: 26px; }
+nav a { color: var(--ink-2); text-decoration: none; font-weight: 600; font-size: 15px; }
+nav a:hover { color: var(--accent); }
+
+.alert { padding: 11px 14px; border-radius: 4px; font-size: 14px; line-height: 1.5; }
+.alert.error { background: #f7dfdc; color: var(--stop); }
+.alert.ok    { background: #dcefe3; color: var(--ok); }
+
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); }
+th { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; }
+code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-size: 13px; }

@@ -1,0 +1,332 @@
+// AI YouTube Automation Platform — data model.
+// Mirrors SRS v1.1 §7.2. Phase 0 exercises User, Subscription, RenderJob and
+// UsageRecord; the remaining entities are defined now so later phases add
+// behaviour rather than reshaping the schema.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  PENDING_VERIFICATION
+  ACTIVE
+  SUSPENDED
+  DELETED
+}
+
+enum Plan {
+  FREE
+  STARTER
+  CREATOR
+  PRO
+  STUDIO
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  INCOMPLETE
+}
+
+enum ProjectState {
+  DRAFT
+  SCRIPTING
+  AWAITING_APPROVAL
+  RENDERING
+  CHECKING
+  BLOCKED
+  READY
+  SCHEDULED
+  PUBLISHING
+  PUBLISHED
+  MEASURING
+  FAILED
+  DOWNLOADED
+}
+
+enum JobStage {
+  DUMMY
+  SCRIPT
+  VOICE
+  VISUALS
+  ASSEMBLY
+  METADATA
+  GUARD
+  PUBLISH
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  DEAD
+}
+
+enum AssetKind {
+  IMAGE
+  CLIP
+  AUDIO
+  VIDEO
+  THUMBNAIL
+  CAPTIONS
+}
+
+enum GuardVerdict {
+  PASS
+  BLOCKED
+}
+
+enum TokenPurpose {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  passwordHash String?
+  googleId     String?    @unique
+  locale       String     @default("en")
+  status       UserStatus @default(PENDING_VERIFICATION)
+  isAdmin      Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  deletedAt    DateTime?
+
+  subscription Subscription?
+  channels     Channel[]
+  projects     Project[]
+  tokens       AuthToken[]
+  sessions     RefreshSession[]
+  usage        UsageRecord[]
+
+  @@index([status])
+}
+
+/// Email verification and password reset. Only the hash is stored, never the
+/// token itself, so a database leak cannot be replayed against the endpoints.
+model AuthToken {
+  id        String       @id @default(uuid())
+  userId    String
+  purpose   TokenPurpose
+  tokenHash String       @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime     @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+}
+
+model RefreshSession {
+  id         String    @id @default(uuid())
+  userId     String
+  tokenHash  String    @unique
+  userAgent  String?
+  expiresAt  DateTime
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Subscription {
+  id                   String             @id @default(uuid())
+  userId               String             @unique
+  plan                 Plan               @default(FREE)
+  status               SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId     String?            @unique
+  stripeSubscriptionId String?            @unique
+  videosUsed           Int                @default(0)
+  periodStart          DateTime           @default(now())
+  periodEnd            DateTime
+  cancelAtPeriodEnd    Boolean            @default(false)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+}
+
+/// Stripe delivers webhooks at least once. Recording the event id makes
+/// handling idempotent, so a redelivery cannot double-apply a plan change.
+model ProcessedWebhook {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+}
+
+model Channel {
+  id               String    @id @default(uuid())
+  userId           String
+  youtubeChannelId String    @unique
+  title            String
+  oauthTokenEnc    Bytes?
+  refreshTokenEnc  Bytes?
+  connectedAt      DateTime  @default(now())
+  disconnectedAt   DateTime?
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projects Project[]
+
+  @@index([userId])
+}
+
+model Project {
+  id                String       @id @default(uuid())
+  userId            String
+  channelId         String?
+  topic             String
+  targetDurationSec Int          @default(60)
+  language          String       @default("en")
+  style             String?
+  state             ProjectState @default(DRAFT)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  channel          Channel?          @relation(fields: [channelId], references: [id], onDelete: SetNull)
+  script           Script?
+  jobs             RenderJob[]
+  assets           Asset[]
+  originalityCheck OriginalityCheck?
+  publication      Publication?
+  usage            UsageRecord[]
+
+  @@index([userId, state])
+}
+
+model Script {
+  id            String    @id @default(uuid())
+  projectId     String    @unique
+  artDirection  String?
+  hook          String?
+  beats         Json?
+  wordCount     Int       @default(0)
+  humanEditedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  scenes  Scene[]
+}
+
+model Scene {
+  id       String  @id @default(uuid())
+  scriptId String
+  ordinal  Int
+  prompt   String
+  imageUrl String?
+  clipUrl  String?
+  startMs  Int     @default(0)
+  endMs    Int     @default(0)
+
+  script Script @relation(fields: [scriptId], references: [id], onDelete: Cascade)
+
+  @@unique([scriptId, ordinal])
+}
+
+model RenderJob {
+  id          String    @id @default(uuid())
+  projectId   String?
+  userId      String?
+  stage       JobStage
+  status      JobStatus @default(QUEUED)
+  attempts    Int       @default(0)
+  maxAttempts Int       @default(3)
+  payload     Json?
+  result      Json?
+  error       String?
+  workerId    String?
+  costUsd     Decimal   @default(0) @db.Decimal(10, 4)
+  enqueuedAt  DateTime  @default(now())
+  startedAt   DateTime?
+  finishedAt  DateTime?
+
+  project Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([status, stage])
+  @@index([projectId])
+}
+
+model Asset {
+  id         String    @id @default(uuid())
+  projectId  String
+  kind       AssetKind
+  storageKey String
+  bytes      Int       @default(0)
+  mime       String?
+  expiresAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, kind])
+}
+
+model OriginalityCheck {
+  id           String       @id @default(uuid())
+  projectId    String       @unique
+  score        Float
+  duplicateOf  String?
+  humanInputMs Int          @default(0)
+  verdict      GuardVerdict
+  reason       String?
+  checkedAt    DateTime     @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+}
+
+model Publication {
+  id             String    @id @default(uuid())
+  projectId      String    @unique
+  youtubeVideoId String?
+  scheduledFor   DateTime?
+  publishedAt    DateTime?
+  visibility     String    @default("private")
+  state          String    @default("scheduled")
+  lastError      String?
+
+  project Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  metrics MetricSnapshot[]
+}
+
+model MetricSnapshot {
+  id               String   @id @default(uuid())
+  publicationId    String
+  capturedAt       DateTime @default(now())
+  views            Int      @default(0)
+  ctr              Float    @default(0)
+  avgViewDuration  Int      @default(0)
+  retention        Json?
+
+  publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
+
+  @@index([publicationId, capturedAt])
+}
+
+model UsageRecord {
+  id        String   @id @default(uuid())
+  userId    String
+  projectId String?
+  kind      String
+  units     Int      @default(1)
+  costUsd   Decimal  @default(0) @db.Decimal(10, 4)
+  billed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+}

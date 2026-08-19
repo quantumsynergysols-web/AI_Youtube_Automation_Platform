@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="color:#11161E;background:#FFFFFF" viewBox="0 20 940 520" role="img" aria-label="Component view in six tiers. A web application sits above four application services: auth, channel manager, project orchestrator and billing. Below them the generation domain holds topic research, scriptwriter, voice synthesis, visual generation, assembly and metadata. All output passes through the Originality Guard, which gates publishing. Below that sit the publisher, analytics ingester and feedback recommender, whose output loops back up into the scriptwriter. A provider adapter layer forms the base.">
+      <defs>
+        <marker id="cpA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="cpB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0E7C86"/>
+        </marker>
+      </defs>
+
+      <g font-family="monospace" font-size="9.5" fill="currentColor" opacity="0.5" letter-spacing="1.1">
+        <text x="24" y="56">UI</text>
+        <text x="24" y="123">APP</text>
+        <text x="24" y="216">GENERATION</text>
+        <text x="24" y="351">GATE</text>
+        <text x="24" y="433">PUBLISH</text>
+        <text x="24" y="508">ADAPTERS</text>
+      </g>
+
+      <g stroke="currentColor" stroke-width="1.1" opacity="0.45" fill="currentColor" fill-opacity="0.09">
+        <rect x="140" y="30"  width="200" height="42" rx="3"/>
+        <rect x="140" y="97" width="181" height="44" rx="3"/>
+        <rect x="333" y="97" width="181" height="44" rx="3"/>
+        <rect x="526" y="97" width="181" height="44" rx="3"/>
+        <rect x="719" y="97" width="181" height="44" rx="3"/>
+        <rect x="140" y="190" width="230" height="42" rx="3"/>
+        <rect x="405" y="190" width="230" height="42" rx="3"/>
+        <rect x="670" y="190" width="230" height="42" rx="3"/>
+        <rect x="140" y="252" width="230" height="42" rx="3"/>
+        <rect x="405" y="252" width="230" height="42" rx="3"/>
+        <rect x="670" y="252" width="230" height="42" rx="3"/>
+        <rect x="140" y="406" width="230" height="44" rx="3"/>
+        <rect x="405" y="406" width="230" height="44" rx="3"/>
+        <rect x="670" y="406" width="230" height="44" rx="3"/>
+        <rect x="140" y="484" width="760" height="38" rx="3"/>
+      </g>
+
+      <rect x="140" y="320" width="500" height="52" rx="3" fill="#0E7C86" fill-opacity="0.16" stroke="#0E7C86" stroke-width="1.6"/>
+
+      <g font-size="12" fill="currentColor" text-anchor="middle">
+        <text x="240" y="56">Web application</text>
+        <text x="230" y="124">Auth and accounts</text>
+        <text x="423" y="124">Channel manager</text>
+        <text x="616" y="124">Project orchestrator</text>
+        <text x="809" y="124">Billing and quota</text>
+        <text x="255" y="216">Topic research</text>
+        <text x="520" y="216">Scriptwriter + art direction</text>
+        <text x="785" y="216">Voice synthesis</text>
+        <text x="255" y="278">Visual generation</text>
+        <text x="520" y="278">Assembly + captions</text>
+        <text x="785" y="278">Metadata + thumbnails</text>
+        <text x="255" y="433">Publisher + scheduler</text>
+        <text x="520" y="433">Analytics ingester</text>
+        <text x="785" y="433">Feedback recommender</text>
+        <text x="520" y="508" font-size="11.5">Provider adapters &#183; LLM &#183; TTS &#183; image &#183; video &#183; data vendor &#183; YouTube &#183; Stripe</text>
+      </g>
+      <text x="390" y="342" font-size="13.5" font-weight="700" fill="currentColor" text-anchor="middle">Originality Guard</text>
+      <text x="390" y="358" font-size="10.5" fill="currentColor" opacity="0.8" text-anchor="middle">publish gate &#183; blocks near-duplicates</text>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.7" marker-end="url(#cpA)">
+        <path d="M 240 72 L 240 92"/>
+        <path d="M 616 141 L 616 185"/>
+        <path d="M 370 211 L 400 211"/>
+        <path d="M 635 211 L 665 211"/>
+        <path d="M 370 273 L 400 273"/>
+        <path d="M 635 273 L 665 273"/>
+        <path d="M 470 232 L 302 250"/>
+        <path d="M 785 232 L 572 250"/>
+        <path d="M 785 294 C 785 312, 520 308, 400 316"/>
+        <path d="M 255 372 L 255 401"/>
+        <path d="M 370 428 L 400 428"/>
+        <path d="M 635 428 L 665 428"/>
+      </g>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.1" opacity="0.4" stroke-dasharray="4 3">
+        <path d="M 255 450 L 255 482"/>
+        <path d="M 520 450 L 520 482"/>
+        <path d="M 785 450 L 785 482"/>
+      </g>
+
+      <path d="M 140 346 L 104 346 L 104 51 L 136 51" fill="none" stroke="currentColor" stroke-width="1.2" opacity="0.55" stroke-dasharray="5 3" marker-end="url(#cpA)"/>
+      <text x="112" y="240" font-size="10" fill="currentColor" opacity="0.7" transform="rotate(-90 112 240)" text-anchor="middle">blocked, with remedy</text>
+
+      <path d="M 900 428 L 920 428 L 920 168 L 520 168 L 520 185" fill="none" stroke="#0E7C86" stroke-width="2" marker-end="url(#cpB)"/>
+      <text x="716" y="161" font-size="11" fill="#0E7C86" font-weight="600" text-anchor="middle">learned preferences feed the next script</text>
+
+      <g font-size="10.5" fill="currentColor" opacity="0.85">
+        <text x="386" y="207" text-anchor="middle">brief</text>
+        <text x="650" y="207" text-anchor="middle">script</text>
+        <text x="386" y="269" text-anchor="middle">stills</text>
+        <text x="650" y="269" text-anchor="middle">render</text>
+        <text x="368" y="247" text-anchor="middle">art direction</text>
+        <text x="664" y="247" text-anchor="middle">word timings</text>
+        <text x="263" y="392" text-anchor="middle">pass</text>
+        <text x="386" y="423" text-anchor="middle">published</text>
+        <text x="650" y="423" text-anchor="middle">metrics</text>
+      </g>
+    </svg>

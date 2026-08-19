@@ -1,0 +1,86 @@
+erDiagram
+  USER ||--|| SUBSCRIPTION : holds
+  USER ||--o{ CHANNEL : connects
+  USER ||--o{ PROJECT : owns
+  CHANNEL ||--o{ PROJECT : targets
+  PROJECT ||--|| SCRIPT : has
+  SCRIPT ||--o{ SCENE : contains
+  PROJECT ||--o{ RENDERJOB : runs
+  PROJECT ||--o{ ASSET : produces
+  PROJECT ||--|| ORIGINALITYCHECK : gated_by
+  PROJECT ||--o| PUBLICATION : yields
+  PUBLICATION ||--o{ METRICSNAPSHOT : measured_by
+  PROJECT ||--o{ USAGERECORD : bills
+
+  USER {
+    uuid id PK
+    string email UK
+    string password_hash
+    string locale
+    string status
+  }
+  SUBSCRIPTION {
+    uuid id PK
+    uuid user_id FK
+    string stripe_customer_id
+    string plan
+    int videos_used
+    date period_end
+  }
+  CHANNEL {
+    uuid id PK
+    uuid user_id FK
+    string youtube_channel_id
+    bytea oauth_token_enc
+    bytea refresh_token_enc
+  }
+  PROJECT {
+    uuid id PK
+    uuid channel_id FK
+    string topic
+    int target_duration
+    string state
+  }
+  SCRIPT {
+    uuid id PK
+    uuid project_id FK
+    text art_direction
+    text hook
+    timestamp human_edited_at
+  }
+  SCENE {
+    uuid id PK
+    uuid script_id FK
+    int ordinal
+    text prompt
+    int start_ms
+  }
+  RENDERJOB {
+    uuid id PK
+    uuid project_id FK
+    string stage
+    int attempts
+    decimal cost_usd
+  }
+  ORIGINALITYCHECK {
+    uuid id PK
+    uuid project_id FK
+    float score
+    uuid duplicate_of FK
+    int human_input_ms
+    string verdict
+  }
+  PUBLICATION {
+    uuid id PK
+    uuid project_id FK
+    string youtube_video_id
+    timestamp scheduled_for
+    string state
+  }
+  METRICSNAPSHOT {
+    uuid id PK
+    uuid publication_id FK
+    timestamp captured_at
+    int views
+    float ctr
+  }

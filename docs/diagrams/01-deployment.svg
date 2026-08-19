@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="color:#11161E;background:#FFFFFF" viewBox="0 86 940 406" role="img" aria-label="Deployment view. The creator browser calls an API service running on the product's own VPS, which enqueues work to a Redis queue consumed by a Python generation worker. The VPS tier reads and writes its own PostgreSQL and object storage, and the browser fetches finished video by signed URL. The worker calls generation providers for script, narration and visuals. Separately the API service calls a third-party channel data vendor for topic research, and reserves the YouTube API for publishing and metrics only.">
+      <defs>
+        <marker id="dpA" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="currentColor"/>
+        </marker>
+        <marker id="dpB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0E7C86"/>
+        </marker>
+      </defs>
+
+      <g font-family="monospace" font-size="10.5" fill="currentColor" opacity="0.55" letter-spacing="1.2">
+        <text x="22" y="140">CLIENT</text>
+        <text x="215" y="100">OWN VPS &#183; DOCKER COMPOSE</text>
+        <text x="215" y="340">OWN MANAGED DATA</text>
+        <text x="560" y="100">EXTERNAL SERVICES</text>
+      </g>
+
+      <rect x="215" y="110" width="270" height="212" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="215" y="110" width="270" height="212" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+      <rect x="215" y="350" width="270" height="110" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="215" y="350" width="270" height="110" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+      <rect x="560" y="110" width="350" height="320" rx="5" fill="currentColor" opacity="0.04"/>
+      <rect x="560" y="110" width="350" height="320" rx="5" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 3" opacity="0.4"/>
+
+      <g stroke="currentColor" stroke-width="1.1" opacity="0.45" fill="currentColor" fill-opacity="0.09">
+        <rect x="22"  y="150" width="168" height="58" rx="3"/>
+        <rect x="240" y="135" width="220" height="50" rx="3"/>
+        <rect x="240" y="205" width="220" height="42" rx="3"/>
+        <rect x="240" y="265" width="220" height="46" rx="3"/>
+        <rect x="238" y="378" width="105" height="46" rx="3"/>
+        <rect x="357" y="378" width="105" height="46" rx="3"/>
+        <rect x="592" y="325" width="140" height="36" rx="3"/>
+        <rect x="746" y="325" width="133" height="36" rx="3"/>
+        <rect x="592" y="369" width="287" height="32" rx="3"/>
+        <rect x="578" y="246" width="315" height="38" rx="3"/>
+      </g>
+
+      <rect x="578" y="300" width="315" height="112" rx="4" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="3 3" opacity="0.35"/>
+      <text x="586" y="316" font-family="monospace" font-size="9.5" fill="currentColor" opacity="0.5" letter-spacing="1">GENERATION PROVIDERS</text>
+
+      <rect x="578" y="130" width="315" height="46" rx="3" fill="#0E7C86" fill-opacity="0.14" stroke="#0E7C86" stroke-width="1.2"/>
+      <rect x="578" y="186" width="315" height="50" rx="3" fill="#0E7C86" fill-opacity="0.14" stroke="#0E7C86" stroke-width="1.2"/>
+
+      <g font-size="12" fill="currentColor" text-anchor="middle">
+        <text x="106" y="174">Creator browser</text>
+        <text x="106" y="191" font-size="10.5" opacity="0.7">React + Vite SPA</text>
+        <text x="350" y="156">API service</text>
+        <text x="350" y="173" font-size="10.5" opacity="0.7">Node + Express</text>
+        <text x="350" y="231">Redis job queue</text>
+        <text x="350" y="285">Generation worker</text>
+        <text x="350" y="301" font-size="10.5" opacity="0.7">Python</text>
+        <text x="290" y="406">PostgreSQL</text>
+        <text x="409" y="399">Object store</text>
+        <text x="409" y="414" font-size="10.5" opacity="0.7">+ CDN</text>
+        <text x="662" y="348">LLM</text>
+        <text x="812" y="348">TTS</text>
+        <text x="735" y="390">Image + video models</text>
+        <text x="735" y="270">Stripe</text>
+        <text x="735" y="149">Channel data vendor</text>
+        <text x="735" y="165" font-size="10.5" opacity="0.75">topic + competitor research</text>
+        <text x="735" y="206">YouTube Data + Analytics API</text>
+        <text x="735" y="222" font-size="10.5" opacity="0.75">publish and metrics only</text>
+      </g>
+
+      <g fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.75" marker-end="url(#dpA)">
+        <path d="M 190 172 L 235 163"/>
+        <path d="M 350 185 L 350 200"/>
+        <path d="M 350 247 L 350 260"/>
+        <path d="M 350 322 L 350 345"/>
+        <path d="M 106 208 L 106 470 L 409 470 L 409 429"/>
+        <path d="M 460 288 C 512 288, 522 340, 573 350"/>
+      </g>
+
+      <g fill="none" stroke="#0E7C86" stroke-width="1.8" marker-end="url(#dpB)">
+        <path d="M 460 150 L 573 152"/>
+        <path d="M 460 170 C 508 170, 524 198, 573 208"/>
+      </g>
+      <path d="M 460 180 C 500 180, 534 248, 573 262" fill="none" stroke="currentColor" stroke-width="1.3" opacity="0.6" marker-end="url(#dpA)"/>
+
+      <g font-size="10.5" fill="currentColor" opacity="0.85">
+        <text x="213" y="153" text-anchor="middle">REST</text>
+        <text x="358" y="199">enqueue</text>
+        <text x="358" y="259">lease</text>
+        <text x="358" y="339">read / write</text>
+        <text x="257" y="484" text-anchor="middle">finished video by signed URL</text>
+        <text x="503" y="326" text-anchor="middle">generation calls</text>
+        <text x="512" y="256" text-anchor="middle">billing</text>
+      </g>
+      <g font-size="10.5" fill="#0E7C86" font-weight="600">
+        <text x="516" y="143" text-anchor="middle">topic research</text>
+        <text x="534" y="185" text-anchor="middle">publish + metrics</text>
+      </g>
+    </svg>

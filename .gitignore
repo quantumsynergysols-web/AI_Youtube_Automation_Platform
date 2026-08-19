@@ -1,0 +1,21 @@
+node_modules/
+dist/
+build/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+coverage/
+.pytest_cache/
+apps/api/prisma/*.db
+*.tsbuildinfo
+
+# Commercial documents — the SRS carries the business model, pricing rationale
+# and competitor analysis. Kept out of the repository while it is public.
+# Remove these two lines once the repo is private.
+docs/*.docx
+docs/*.pdf

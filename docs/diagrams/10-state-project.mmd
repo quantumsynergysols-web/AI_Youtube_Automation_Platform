@@ -1,0 +1,22 @@
+stateDiagram-v2
+  [*] --> Draft
+  Draft --> Scripting : topic confirmed
+  Scripting --> AwaitingApproval : script generated
+  AwaitingApproval --> Scripting : creator requests rewrite
+  AwaitingApproval --> Rendering : hook approved + commentary added
+  Rendering --> Rendering : scene retry
+  Rendering --> Failed : attempts exhausted
+  Failed --> Rendering : admin re-run
+  Rendering --> Checking : assembly complete
+  Checking --> Blocked : originality below threshold
+  Blocked --> AwaitingApproval : creator adds original input
+  Checking --> Ready : guard passed
+  Ready --> Scheduled : publication scheduled
+  Ready --> Downloaded : downloaded without publishing
+  Scheduled --> Publishing : scheduled time reached
+  Publishing --> Scheduled : quota backoff
+  Publishing --> Published : upload succeeded
+  Published --> Measuring : first metrics received
+  Measuring --> Measuring : nightly snapshot
+  Downloaded --> [*]
+  Measuring --> [*]

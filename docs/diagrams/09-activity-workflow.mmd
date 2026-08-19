@@ -1,0 +1,23 @@
+flowchart TD
+  ST([Start]) --> A["Select niche and topic"]
+  A --> B{"Allowance<br/>remaining?"}
+  B -->|no| UP["Upgrade or buy overage"] --> B
+  B -->|yes| C["Generate script + art direction"]
+  C --> D["/ Review hook /"]
+  D --> E{"Approved?"}
+  E -->|edit| C
+  E -->|yes| F["/ Add original commentary /"]
+  F --> G["Synthesise narration"]
+  G --> H["Generate stills and clips"]
+  H --> I["Assemble, caption, encode"]
+  I --> J["Generate metadata + thumbnails"]
+  J --> K{"Originality<br/>Guard"}
+  K -->|blocked| L["Show remedy"] --> F
+  K -->|pass| M["/ Choose title and thumbnail /"]
+  M --> N{"Publish now<br/>or schedule?"}
+  N -->|download only| O([Download])
+  N -->|schedule| P["Queue for upload"]
+  P --> Q["Upload to YouTube"]
+  Q --> R["Collect metrics"]
+  R --> S["Recommend next topic"]
+  S --> A
