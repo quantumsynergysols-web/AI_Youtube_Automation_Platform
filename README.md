@@ -1,7 +1,11 @@
-# AI YouTube Automation Platform
+# ViralPilot
 
-Standalone product of Quantum Synergy Solutions. Helps established YouTube creators
-produce and publish video without putting the channel's monetisation at risk.
+ViralPilot keeps established, already-monetised creators in control of AI-assisted
+production. It protects the channel and its originality before it optimises output
+volume. The human remains the pilot by design: every video is reviewed and approved,
+not handed to an autopilot that publishes unchecked.
+
+Standalone product of Quantum Synergy Solutions.
 
 This repository currently contains **Phase 0 — Standalone foundation** (SRS v1.1, weeks 1–3):
 authentication and accounts (FR-1), subscriptions, billing and quota (FR-12), and the

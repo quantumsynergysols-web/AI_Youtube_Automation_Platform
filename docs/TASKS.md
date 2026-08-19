@@ -1,4 +1,4 @@
-# Task ledger
+# ViralPilot task ledger
 
 Claude authors every task; Codex implements against the prompt as written.
 Statuses: `open` (handed over) · `in review` (PR open) · `merged` · `dropped`.

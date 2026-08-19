@@ -31,7 +31,9 @@ export default function Register() {
 
   return (
     <div className="card">
+      <p className="eyebrow">ViralPilot</p>
       <h1>Create an account</h1>
+      <p>Built for established creators who put channel protection before output volume.</p>
       <Alert error={error} message={done} />
       {!done && (
         <form className="stack" onSubmit={submit}>

@@ -1,5 +1,6 @@
 {
   "name": "@ytap/web",
+  "description": "ViralPilot web application",
   "version": "0.1.0",
   "private": true,
   "type": "module",

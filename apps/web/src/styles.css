@@ -42,6 +42,8 @@ p { color: var(--ink-2); margin: 0; line-height: 1.55; }
 nav { display: flex; align-items: center; gap: 24px; min-height: 54px; padding-bottom: 18px; border-bottom: 1px solid var(--rule); margin-bottom: 38px; }
 .nav-links { display: flex; gap: 7px; }
 nav a { color: var(--ink-2); text-decoration: none; font-weight: 650; font-size: 15px; padding: 9px 12px; border-radius: 6px; }
+nav a.brand { padding-left: 0; color: var(--ink); font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+nav a.brand:hover { color: var(--accent-dark); background: transparent; }
 nav a:hover, nav a.active { color: var(--accent-dark); background: var(--accent-soft); }
 .account-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
 .link-button { padding: 0; color: var(--accent-dark); background: none; border: 0; font-size: 14px; }
@@ -103,6 +105,6 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 .modal-actions { justify-content: flex-end; margin-top: 8px; }
 
 @media (max-width: 700px) {
-  .shell { padding: 18px 16px 56px; } nav { align-items: flex-start; margin-bottom: 28px; }.nav-links { gap: 0; overflow-x: auto; }.account-nav { font-size: 0; }.account-nav .link-button { font-size: 14px; }
+  .shell { padding: 18px 16px 56px; } nav { align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; }.nav-links { order: 3; width: 100%; gap: 0; overflow-x: auto; }.account-nav { font-size: 0; }.account-nav .link-button { font-size: 14px; }
   .page-header { align-items: flex-start; flex-direction: column; }.page-header > button { width: 100%; }.card { padding: 20px; }.channel-grid { grid-template-columns: 1fr; }.page-state { grid-template-columns: 1fr; padding: 22px; }
 }

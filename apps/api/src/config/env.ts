@@ -43,7 +43,7 @@ const schema = z.object({
   TOKEN_ENCRYPTION_KEY: z.string().optional(),
 
   SMTP_URL: z.string().optional(),
-  MAIL_FROM: z.string().default('AI YouTube Automation <no-reply@example.com>'),
+  MAIL_FROM: z.string().default('ViralPilot <no-reply@viralpilot.io>'),
 })
 
 const parsed = schema.safeParse(process.env)

@@ -1,45 +1,31 @@
-# Deployment — Hostinger VPS
+# ViralPilot deployment — Hostinger VPS
 
-Runbook for putting the platform on a subdomain of an existing Hostinger VPS that
-already runs another product.
+Runbook for deploying ViralPilot at `app.viralpilot.io` on an existing Hostinger VPS.
+The primary topology uses one hostname: nginx serves the web app and proxies `/api/`
+and `/health/` to the API. This keeps browser requests same-origin and avoids CORS
+configuration drift.
 
-Replace these throughout before running anything:
-
-| Placeholder | Meaning | Example |
-| --- | --- | --- |
-| `APP_DOMAIN` | web application hostname | `app.ytauto.com` |
-| `API_DOMAIN` | API hostname | `api.ytauto.com` |
-| `VPS_IP` | server address | `62.72.33.103` |
-
-Auth uses bearer tokens in `localStorage`, not cookies, so the two hostnames need
-only a CORS entry — no cookie-domain coupling. If you would rather avoid CORS
-entirely, see [One-subdomain alternative](#one-subdomain-alternative).
+Replace `VPS_IP` below with the server address. Internal `ytap` user, database, service,
+and path names intentionally remain stable.
 
 ---
 
 ## 0. Before you touch the server
 
-Two things must be true or later steps fail in confusing ways.
+**DNS.** Create one A record and wait for it to resolve. Certbot cannot issue a
+certificate until the hostname reaches the VPS.
 
-**DNS.** Create two A records pointing at `VPS_IP`, and wait for them to resolve.
-Certbot fails if it cannot reach the name it is issuing for.
-
-```
+```text
 A   app   VPS_IP
-A   api   VPS_IP
 ```
 
 ```bash
-dig +short APP_DOMAIN
-dig +short API_DOMAIN     # both must print VPS_IP
+dig +short app.viralpilot.io     # must print VPS_IP
 ```
 
-**Capacity.** This product does not share a runtime with anything already on the
-box. Phase 0 is light — an API process and a worker that currently does nothing but
-echo. From Phase 2 the worker runs FFmpeg, and if the other product also renders
-video on the same 2 vCPU, they will contend for the same cores. Plan to either move
-rendering to its own box or accept slower renders on both. It is not a Phase 0
-problem; it is a Phase 2 problem worth knowing now.
+**Capacity.** ViralPilot does not share a runtime with anything already on the box.
+The API is light, but later rendering work uses FFmpeg. If another product also renders
+video on the same 2 vCPU, move rendering to its own host or accept slower jobs.
 
 ---
 
@@ -54,18 +40,17 @@ curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt install -y node
 node -v && python3.11 --version && psql --version
 ```
 
-Firewall — only HTTP, HTTPS and SSH are exposed. Postgres, Redis and the app
-processes stay on loopback.
-
 ```bash
 ufw allow OpenSSH && ufw allow 'Nginx Full' && ufw --force enable
 ```
+
+PostgreSQL, Redis, and application processes stay on loopback.
 
 ---
 
 ## 2. Database and Redis
 
-A dedicated role and database. Choose a real password; do not reuse the one below.
+Use a dedicated role and database. Choose a real password.
 
 ```bash
 sudo -u postgres psql <<'SQL'
@@ -76,16 +61,14 @@ GRANT ALL ON SCHEMA public TO ytap;
 SQL
 ```
 
-Redis is shared with whatever else is on the box, so **use a dedicated database
-index** rather than the default. Index `3` below; confirm nothing else uses it.
+Redis may be shared with another product, so use a dedicated database index. Index `3`
+is the example below; confirm it is unused first.
 
 ```bash
 redis-cli -n 3 DBSIZE      # must print 0
 ```
 
-The app then points at `redis://localhost:6379/3`. Both `ioredis` and the Python
-client honour the index in the URL, so API and worker stay isolated from the other
-product's keys.
+Both runtimes then use `redis://localhost:6379/3`.
 
 ---
 
@@ -121,11 +104,11 @@ DATABASE_URL=postgresql://ytap:CHANGE_ME_STRONG_PASSWORD@localhost:5432/ytap?sch
 REDIS_URL=redis://localhost:6379/3
 
 API_PORT=4300
-API_PUBLIC_URL=https://API_DOMAIN
-WEB_PUBLIC_URL=https://APP_DOMAIN
+API_PUBLIC_URL=https://app.viralpilot.io
+WEB_PUBLIC_URL=https://app.viralpilot.io
+VITE_API_URL=https://app.viralpilot.io
 
-# 48 random bytes each. Generate, do not invent:
-#   openssl rand -base64 48
+# Generate 48 random bytes for each JWT secret: openssl rand -base64 48
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
 
@@ -137,38 +120,36 @@ STRIPE_PRICE_PRO=price_...
 STRIPE_PRICE_STUDIO=price_...
 
 GOOGLE_CLIENT_ID=....apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=https://app.viralpilot.io/api/channels/callback
 VITE_GOOGLE_CLIENT_ID=....apps.googleusercontent.com
+TOKEN_ENCRYPTION_KEY=
 
 SMTP_URL=smtps://user:pass@smtp.provider.com:465
-MAIL_FROM="AI YouTube Automation <no-reply@APP_DOMAIN>"
+MAIL_FROM="ViralPilot <no-reply@viralpilot.io>"
 
 WORKER_RECLAIM_ON_START=1
 ```
 
 ```bash
 chmod 600 /srv/ytap/app/.env && chown ytap:ytap /srv/ytap/app/.env
-```
-
-Apply the schema, then build the web app — Vite inlines `VITE_*` at build time, so
-it must be built *after* the env file exists.
-
-```bash
 cd /srv/ytap/app/apps/api  && sudo -u ytap npx prisma migrate deploy
 cd /srv/ytap/app/apps/web  && sudo -u ytap npm run build
 ```
 
-> `SMTP_URL` is not optional in production. Left blank, verification and reset
-> emails are written to the log instead of sent, and nobody can complete signup.
+Vite inlines `VITE_*` values at build time, so build the web app after the production
+environment exists. `SMTP_URL` is required in production; without it, verification and
+reset messages are logged rather than delivered.
 
 ---
 
 ## 5. Services
 
-`/etc/systemd/system/ytap-api.service`
+Create `/etc/systemd/system/ytap-api.service`:
 
 ```ini
 [Unit]
-Description=AI YouTube Automation API
+Description=ViralPilot API
 After=network.target postgresql.service redis-server.service
 
 [Service]
@@ -187,11 +168,11 @@ ReadWritePaths=/srv/ytap
 WantedBy=multi-user.target
 ```
 
-`/etc/systemd/system/ytap-worker.service`
+Create `/etc/systemd/system/ytap-worker.service`:
 
 ```ini
 [Unit]
-Description=AI YouTube Automation worker
+Description=ViralPilot worker
 After=network.target postgresql.service redis-server.service
 
 [Service]
@@ -209,52 +190,32 @@ PrivateTmp=true
 WantedBy=multi-user.target
 ```
 
-`PYTHONPATH` is required — the worker is not pip-installed. Without it the unit
-fails with `No module named worker`.
-
 ```bash
 systemctl daemon-reload
 systemctl enable --now ytap-api ytap-worker
 systemctl status ytap-api ytap-worker --no-pager
-curl -s localhost:4300/health/ready      # expect database ok, redis ok
+curl -s localhost:4300/health/ready
 ```
 
-**Run one worker only.** `WORKER_RECLAIM_ON_START=1` returns jobs stranded in the
-processing list to pending on boot, which is correct for a single worker and would
-steal in-flight jobs from a second. Before scaling out, set it to `0` and replace it
-with lease-based expiry.
+Run one worker while `WORKER_RECLAIM_ON_START=1`; reclaim-on-boot is not safe with
+multiple workers.
 
 ---
 
-## 6. nginx
+## 6. nginx — primary one-subdomain setup
 
-`/etc/nginx/sites-available/ytap`
+Create `/etc/nginx/sites-available/ytap`:
 
 ```nginx
 server {
     listen 80;
-    server_name APP_DOMAIN;
+    server_name app.viralpilot.io;
     root /srv/ytap/app/apps/web/dist;
     index index.html;
 
-    location / {
-        try_files $uri $uri/ /index.html;   # SPA routes
-    }
-
-    location ~* \.(js|css|svg|woff2)$ {
-        expires 1y;
-        add_header Cache-Control "public, immutable";
-    }
-}
-
-server {
-    listen 80;
-    server_name API_DOMAIN;
-
-    # Rendered video will be large later; raise this before Phase 2.
     client_max_body_size 25m;
 
-    location / {
+    location /api/ {
         proxy_pass         http://127.0.0.1:4300;
         proxy_http_version 1.1;
         proxy_set_header   Host              $host;
@@ -263,11 +224,29 @@ server {
         proxy_set_header   X-Forwarded-Proto $scheme;
         proxy_read_timeout 120s;
     }
+
+    location /health/ {
+        proxy_pass         http://127.0.0.1:4300;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location ~* \.(js|css|svg|woff2)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
 }
 ```
 
-`X-Forwarded-Proto` matters: the app sets `trust proxy`, and rate limiting keys off
-the real client IP rather than nginx's.
+`X-Forwarded-Proto` matters because the app trusts the proxy and rate limiting uses
+the forwarded client address.
 
 ```bash
 ln -s /etc/nginx/sites-available/ytap /etc/nginx/sites-enabled/ytap
@@ -280,70 +259,52 @@ nginx -t && systemctl reload nginx
 
 ```bash
 apt install -y certbot python3-certbot-nginx
-certbot --nginx -d APP_DOMAIN -d API_DOMAIN --agree-tos -m you@example.com --redirect
-systemctl status certbot.timer      # renewal is automatic
+certbot --nginx -d app.viralpilot.io --agree-tos -m you@viralpilot.io --redirect
+systemctl status certbot.timer
 ```
-
-Certbot rewrites the vhosts to listen on 443 and redirect from 80.
 
 ---
 
-## 8. Google sign-in
+## 8. Google OAuth
 
-Google Cloud Console → APIs and Services → Credentials → **Create OAuth client ID**
-→ Web application.
+In Google Cloud Console, configure the OAuth web client with both environments:
 
-- **Authorized JavaScript origins:** `https://APP_DOMAIN`
-- **Authorized redirect URIs:** `https://API_DOMAIN/api/auth/google/callback`
+- Authorized JavaScript origins: `http://localhost:5273` and `https://app.viralpilot.io`
+- Authorized redirect URIs: `http://localhost:4300/api/channels/callback` and
+  `https://app.viralpilot.io/api/channels/callback`
 
-The redirect URI is unused by FR-1.2 — the ID-token flow needs only the origin — but
-FR-2 channel connection uses the authorization code flow from this same client, so
-registering it now avoids a second verification round.
-
-Put the client id in **both** `GOOGLE_CLIENT_ID` and `VITE_GOOGLE_CLIENT_ID`, then
-rebuild the web app. The client secret is not needed until FR-2.
-
-Exact-match rules: `https://APP_DOMAIN` and `https://www.APP_DOMAIN` are different
-origins to Google, and http is not https.
+Google requires exact origin and redirect matches. Register **both** localhost and
+production entries; otherwise making one environment work breaks the other. Put the client
+id in `GOOGLE_CLIENT_ID` and `VITE_GOOGLE_CLIENT_ID`, add the client secret for channel
+connection, then rebuild the web app.
 
 ---
 
 ## 9. Stripe
 
-Test mode until you are ready to charge.
+Use test mode until the product is ready to charge.
 
-1. Create four recurring monthly prices — $29, $79, $199, $399 — and copy the
-   `price_…` ids into `.env`.
-2. Developers → Webhooks → **Add endpoint**: `https://API_DOMAIN/api/billing/webhook`
-3. Send: `checkout.session.completed`, `customer.subscription.created`,
-   `customer.subscription.updated`, `customer.subscription.deleted`, `invoice.paid`
-4. Copy the signing secret into `STRIPE_WEBHOOK_SECRET` and restart the API.
+1. Create the four recurring prices and copy their ids into `.env`.
+2. Add webhook endpoint `https://app.viralpilot.io/api/billing/webhook`.
+3. Send `checkout.session.completed`, `customer.subscription.created`,
+   `customer.subscription.updated`, `customer.subscription.deleted`, and `invoice.paid`.
+4. Copy its signing secret into `STRIPE_WEBHOOK_SECRET` and restart the API.
 
-`invoice.paid` is what resets `videosUsed` each period. Omit it and allowances never
-refill.
+`invoice.paid` resets `videosUsed` each period.
 
 ---
 
 ## 10. Verify
 
 ```bash
-curl -s https://API_DOMAIN/health/ready
-curl -s https://API_DOMAIN/api/billing/plans | head -c 200
+curl -s https://app.viralpilot.io/health/ready
+curl -s https://app.viralpilot.io/api/billing/plans | head -c 200
+API_URL=https://app.viralpilot.io node scripts/verify-g0.mjs
 ```
 
-Then the gate, from your machine:
-
-```bash
-API_URL=https://API_DOMAIN node scripts/verify-g0.mjs
-```
-
-Step 4 shells out to `prisma db execute` and will fail against a remote database
-unless `DATABASE_URL` reaches it. Either run the script on the server, or verify a
-real signup by email instead — which is the better test, since it also proves SMTP.
-
-Finish by hand: sign up at `https://APP_DOMAIN`, confirm the email arrives,
-subscribe with test card `4242 4242 4242 4242`, and check the dashboard reports the
-plan you bought.
+The gate script's database step must run where `DATABASE_URL` can reach PostgreSQL.
+Finish by signing up at `https://app.viralpilot.io`, confirming the email arrives,
+completing a Stripe test checkout, and checking that the dashboard shows the plan.
 
 ---
 
@@ -360,29 +321,16 @@ systemctl restart ytap-api ytap-worker
 curl -s localhost:4300/health/ready
 ```
 
-Migrations run before the restart so the new code never meets an old schema.
-
 ---
 
-## One-subdomain alternative
+## Two-subdomain alternative
 
-To serve everything from `APP_DOMAIN` and avoid CORS, drop the second server block
-and add to the first:
-
-```nginx
-location /api/ {
-    proxy_pass http://127.0.0.1:4300;
-    # ...same proxy headers as above
-}
-location /health/ {
-    proxy_pass http://127.0.0.1:4300;
-}
-```
-
-Then set `API_PUBLIC_URL=https://APP_DOMAIN`, `VITE_API_URL=https://APP_DOMAIN`, and
-register only `https://APP_DOMAIN` with Google. One certificate, one DNS record, no
-CORS. The cost is that the API cannot later be scaled or moved independently without
-changing URLs.
+If the API later needs an independently movable hostname, add `api.viralpilot.io`, serve
+the API from a second nginx server block, and set `API_PUBLIC_URL` and `VITE_API_URL` to
+`https://api.viralpilot.io`. Keep `WEB_PUBLIC_URL=https://app.viralpilot.io`, add the web
+origin to the API CORS allowlist, issue a certificate for both hostnames, and update Google
+and Stripe callback URLs. This topology adds DNS, TLS, and CORS surface area, so it is not
+the default.
 
 ---
 
@@ -390,11 +338,10 @@ changing URLs.
 
 | Symptom | Cause |
 | --- | --- |
-| API exits at boot | `.env` invalid — the config schema refuses to start rather than fail later. The log names the field. |
-| `No module named worker` | `PYTHONPATH` missing from the worker unit. |
-| Jobs queue but never run | Worker down, or API and worker on different Redis indexes. |
-| CORS error in the browser | `WEB_PUBLIC_URL` does not exactly match the origin, scheme included. |
-| Google button absent | `VITE_GOOGLE_CLIENT_ID` was unset when the web app was built. Rebuild after editing `.env`. |
-| Google sign-in returns 501 | `GOOGLE_CLIENT_ID` missing from the API environment. |
-| Stripe webhooks 400 | Wrong `STRIPE_WEBHOOK_SECRET`, or a proxy altering the body — the route needs raw bytes. |
-| Allowance never resets | `invoice.paid` not selected on the webhook endpoint. |
+| API exits at boot | `.env` is invalid; the log names the field. |
+| `No module named worker` | `PYTHONPATH` is missing from the worker unit. |
+| Jobs queue but never run | Worker is down, or API and worker use different Redis indexes. |
+| Google button absent | `VITE_GOOGLE_CLIENT_ID` was unset at build time; rebuild after setting it. |
+| Google redirect mismatch | The exact localhost or production redirect URI is absent in Google Cloud. |
+| Stripe webhooks return 400 | The signing secret is wrong, or a proxy altered the raw request body. |
+| Allowance never resets | `invoice.paid` is not selected for the webhook. |
