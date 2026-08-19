@@ -127,13 +127,13 @@ model AuthToken {
 }
 
 model RefreshSession {
-  id         String    @id @default(uuid())
-  userId     String
-  tokenHash  String    @unique
-  userAgent  String?
-  expiresAt  DateTime
-  revokedAt  DateTime?
-  createdAt  DateTime  @default(now())
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  userAgent String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -170,12 +170,22 @@ model ProcessedWebhook {
 model Channel {
   id               String    @id @default(uuid())
   userId           String
+  /// Globally unique: two accounts automating the same channel would double-post.
+  /// Disconnecting deletes the row, so a channel can be reconnected afterwards.
   youtubeChannelId String    @unique
   title            String
+  thumbnailUrl     String?
   oauthTokenEnc    Bytes?
   refreshTokenEnc  Bytes?
+  tokenExpiresAt   DateTime?
+  grantedScopes    String[]  @default([])
+  /// FR-2.5 baseline, captured at connect time so later metrics have something
+  /// to be compared against.
+  subscriberCount  Int?
+  videoCount       Int?
+  baselineAt       DateTime?
   connectedAt      DateTime  @default(now())
-  disconnectedAt   DateTime?
+  lastRefreshedAt  DateTime?
 
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   projects Project[]
@@ -302,13 +312,13 @@ model Publication {
 }
 
 model MetricSnapshot {
-  id               String   @id @default(uuid())
-  publicationId    String
-  capturedAt       DateTime @default(now())
-  views            Int      @default(0)
-  ctr              Float    @default(0)
-  avgViewDuration  Int      @default(0)
-  retention        Json?
+  id              String   @id @default(uuid())
+  publicationId   String
+  capturedAt      DateTime @default(now())
+  views           Int      @default(0)
+  ctr             Float    @default(0)
+  avgViewDuration Int      @default(0)
+  retention       Json?
 
   publication Publication @relation(fields: [publicationId], references: [id], onDelete: Cascade)
 
