@@ -34,6 +34,14 @@ enum SubscriptionStatus {
   INCOMPLETE
 }
 
+/// Why the Originality Guard blocked, so the review UI can route the creator to
+/// the fix without re-deriving the service's thresholds on the client.
+enum GuardBlockReason {
+  SIMILARITY
+  COMMENTARY
+  HOOK
+}
+
 enum SceneRole {
   HOOK
   INTRODUCTION
@@ -348,6 +356,10 @@ model OriginalityCheck {
   requiresDisclosure Boolean      @default(true)
   /// FR-9.4 — non-blocking cadence warnings.
   warnings           String[]     @default([])
+  /// Which rule blocked, null when nothing did. Stored rather than derived so
+  /// the audit record explains its own verdict years later, when the thresholds
+  /// that produced it may no longer be the ones in the code.
+  blockedOn          GuardBlockReason?
   verdict            GuardVerdict
   reason             String?
   checkedAt          DateTime     @default(now())

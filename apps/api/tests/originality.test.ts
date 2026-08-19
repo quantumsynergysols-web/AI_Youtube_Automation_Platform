@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { GuardVerdict } from '@prisma/client'
+import { GuardBlockReason, GuardVerdict } from '@prisma/client'
 
 const prismaMock = {
   project: { findUnique: vi.fn() },
@@ -165,6 +165,57 @@ describe('runOriginalityCheck — blocking on missing human input (FR-9.3)', () 
 
     const result = await runOriginalityCheck('project-1')
     expect(result.reason).toContain('dup1')
+  })
+})
+
+describe('runOriginalityCheck — naming what blocked (FR-9.2)', () => {
+  // The verdict alone does not tell a client which fix to offer, and a client
+  // that re-derives it has to hardcode this service's thresholds — which then
+  // misroute silently the first time DUPLICATE_THRESHOLD is retuned.
+  it('names similarity when the script duplicates a previous video', async () => {
+    prismaMock.project.findUnique.mockResolvedValue(project())
+    prismaMock.channelVideo.findMany.mockResolvedValue([
+      {
+        youtubeVideoId: 'abc123',
+        title: 'Three keyboard shortcuts that changed how I edit',
+        description: 'shortcut one saves time shortcut two avoids the mouse',
+      },
+    ])
+    const result = await runOriginalityCheck('project-1')
+    expect(result.blockedOn).toBe(GuardBlockReason.SIMILARITY)
+  })
+
+  it('names commentary when that is what is missing', async () => {
+    prismaMock.project.findUnique.mockResolvedValue(project({ script: { commentary: null } }))
+    const result = await runOriginalityCheck('project-1')
+    expect(result.blockedOn).toBe(GuardBlockReason.COMMENTARY)
+  })
+
+  it('names the hook when that is what is missing', async () => {
+    prismaMock.project.findUnique.mockResolvedValue(project({ script: { hookEditedAt: null } }))
+    const result = await runOriginalityCheck('project-1')
+    expect(result.blockedOn).toBe(GuardBlockReason.HOOK)
+  })
+
+  it('names nothing when the script passes', async () => {
+    prismaMock.project.findUnique.mockResolvedValue(project())
+    const result = await runOriginalityCheck('project-1')
+    expect(result.blockedOn).toBeNull()
+  })
+
+  it('reports the most expensive fix first when several apply', async () => {
+    prismaMock.project.findUnique.mockResolvedValue(
+      project({ script: { commentary: null, hookEditedAt: null } }),
+    )
+    prismaMock.channelVideo.findMany.mockResolvedValue([
+      {
+        youtubeVideoId: 'dup1',
+        title: 'Three keyboard shortcuts that changed how I edit',
+        description: 'shortcut one saves time shortcut two avoids the mouse',
+      },
+    ])
+    const result = await runOriginalityCheck('project-1')
+    expect(result.blockedOn).toBe(GuardBlockReason.SIMILARITY)
   })
 })
 
