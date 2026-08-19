@@ -1,4 +1,4 @@
-import { Link, Navigate, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, NavLink, Route, Routes } from 'react-router-dom'
 import { useAuth } from './lib/auth'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -7,10 +7,11 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
+import Channels from './pages/Channels'
 
 function Protected({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth()
-  if (loading) return <div className="shell"><p className="muted">Loading…</p></div>
+  if (loading) return <div className="card"><p className="muted" role="status">Loading your account…</p></div>
   return me ? children : <Navigate to="/login" replace />
 }
 
@@ -19,14 +20,18 @@ export default function App() {
 
   return (
     <div className="shell">
-      <nav>
-        <Link to="/">Dashboard</Link>
-        <Link to="/billing">Billing</Link>
-        <span style={{ marginLeft: 'auto' }} className="muted">
+      <a className="skip-link" href="#main-content">Skip to content</a>
+      <nav aria-label="Main navigation">
+        <div className="nav-links">
+          <NavLink to="/" end>Dashboard</NavLink>
+          <NavLink to="/channels">Channels</NavLink>
+          <NavLink to="/billing">Billing</NavLink>
+        </div>
+        <span className="account-nav">
           {me ? (
             <>
               {me.email}{' '}
-              <a href="#" onClick={(e) => { e.preventDefault(); void signOut() }}>Sign out</a>
+              <button className="link-button" onClick={() => void signOut()}>Sign out</button>
             </>
           ) : (
             <Link to="/login">Sign in</Link>
@@ -41,6 +46,7 @@ export default function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/billing" element={<Protected><Billing /></Protected>} />
+        <Route path="/channels" element={<Protected><Channels /></Protected>} />
         <Route path="/" element={<Protected><Dashboard /></Protected>} />
       </Routes>
     </div>
