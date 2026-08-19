@@ -1,16 +1,7 @@
+import { ApiFailure } from './errors'
+export { ApiFailure, type ApiError } from './errors'
+
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4300'
-
-export interface ApiError {
-  code: string
-  message: string
-  details?: { field: string; message: string }[]
-}
-
-export class ApiFailure extends Error {
-  constructor(public readonly status: number, public readonly error: ApiError) {
-    super(error.message)
-  }
-}
 
 const ACCESS = 'ytap.access'
 const REFRESH = 'ytap.refresh'
