@@ -9,10 +9,28 @@ rewritten.
 
 | ID | Title | Lane | Status | PR |
 | --- | --- | --- | --- | --- |
-| CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | in review — changes requested | #2 |
-| CDX-002 | UI/UX pass: loading, empty and error states across the web app | UI/UX | queued behind CDX-001 | — |
+| CDX-001 | DB-backed integration test suite for auth, billing and allowance | QA | **merged** | #2 |
+| CDX-002 | Channels screen for FR-2, with proper loading, empty and error states | UI/UX | open | — |
 
 ---
+
+### Commit attribution
+
+Both agents authenticate to GitHub as , so the PR page cannot tell
+them apart. Keep the shared account for auth, but set a distinct **git author** so
+the history stays truthful:
+
+| Agent |  |
+| --- | --- |
+| Claude | , plus a  trailer |
+| Codex |  |
+
+Shehryar Ahmed FR-2: channel connection via YouTube OAuth (core) (#4)
+Shehryar Ahmed CDX-001: add DB-backed auth, billing and allowance integration tests (#2)
+star-anonymus docs: sequence deployment after the build, record what it does and does not block
+Shehryar Ahmed docs: deployment runbook for a subdomain on an existing VPS (#3)
+Shehryar Ahmed FR-1.2: Google sign-in (#1)
+star-anonymus Phase 0: standalone foundation should make authorship obvious without opening a diff.
 
 ## Claude's parallel track
 
@@ -22,8 +40,9 @@ Not Codex work. Listed so the two lanes do not collide.
 | --- | --- | --- |
 | FR-1.2 Google OAuth sign-in | 0 (carried) | **merged** (#1) |
 | Deployment runbook | infra | **merged** (#3) |
-| FR-2 Channel connection, YouTube OAuth | 1 | **next** |
-| FR-2 history import and token refresh | 1 | after FR-2 core |
+| FR-2 Channel connection, YouTube OAuth | 1 | **merged** (#4) — API only, UI is CDX-002 |
+| FR-2.5 full history import (back catalogue) | 1 | next — FR-9 duplicate detection needs it |
+| Gate G1 live verification | 1 | blocked on Google OAuth client credentials |
 | Lease-based reclaim to replace reclaim-on-boot | infra | deferred — single worker is correct for now |
 
 ### Sequencing note — deployment is deliberately deferred
