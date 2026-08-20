@@ -7,8 +7,6 @@ import {
   COMMENTARY_FLOOR,
   countWords,
   generationError,
-  guardTarget,
-  type GuardTarget,
 } from './script-review.logic'
 
 type SceneRole = 'HOOK' | 'INTRODUCTION' | 'BODY' | 'CALL_TO_ACTION'
@@ -49,6 +47,7 @@ interface GuardResult {
   requiresDisclosure: boolean
   warnings: string[]
   reason: string | null
+  blockedOn: 'SIMILARITY' | 'COMMENTARY' | 'HOOK' | null
 }
 
 type GuardResponse = { checked: false } | ({ checked: true } & GuardResult)
@@ -112,7 +111,7 @@ export default function ScriptReview() {
     } catch {
       setGuard(null)
       setActionError('Your edit was saved, but its guard status could not be refreshed. Reload this page before relying on the publishing result.')
-      return null
+      return undefined
     }
   }, [refreshGuard])
 
@@ -232,6 +231,7 @@ export default function ScriptReview() {
 
   async function saveScene(ordinal: number) {
     const narration = sceneDrafts[ordinal] ?? ''
+    const hadGuard = guard !== null
     setSavingScene(ordinal)
     setActionError(null)
     setNotice(null)
@@ -244,7 +244,15 @@ export default function ScriptReview() {
       })
       adoptScript(updated)
       const currentGuard = await refreshGuardAfterSave()
-      setNotice(currentGuard ? 'Scene narration was unchanged, so the existing guard result still applies.' : 'Scene narration saved. The previous guard result was cleared because the script text changed; run it again after your rewrites are complete.')
+      if (currentGuard === undefined) {
+        setNotice('Scene narration saved. Reload this page to confirm whether the guard needs to run again.')
+      } else if (currentGuard) {
+        setNotice('Scene narration was unchanged, so the existing guard result still applies.')
+      } else if (hadGuard) {
+        setNotice('Scene narration saved. The previous guard result was cleared because the script text changed; run it again after your rewrites are complete.')
+      } else {
+        setNotice('Scene narration saved. Run the Originality Guard after your rewrites are complete.')
+      }
     } catch (error) {
       tracker.current.restore(delta)
       setActionError(error instanceof Error ? `${error.message} Your rewritten narration remains here; try saving again.` : 'The scene could not be saved. Your rewritten narration remains here; try again.')
@@ -269,10 +277,10 @@ export default function ScriptReview() {
     }
   }
 
-  function goToFix(target: GuardTarget) {
-    const element = target === 'commentary' ? commentaryRef.current : target === 'hook' ? hookRef.current : scenesRef.current
+  function goToFix(blockedOn: GuardResult['blockedOn']) {
+    const element = blockedOn === 'COMMENTARY' ? commentaryRef.current : blockedOn === 'HOOK' ? hookRef.current : scenesRef.current
     element?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    if (target !== 'scenes') element?.focus()
+    if (blockedOn !== 'SIMILARITY') element?.focus()
   }
 
   if (script === undefined && !loadError) return <main className="page"><LoadingState label="Loading script review" /></main>
@@ -331,7 +339,7 @@ export default function ScriptReview() {
 
           <section className="card guard-panel" aria-labelledby="guard-heading">
             <div className="section-heading"><div><p className="eyebrow">Publishing gate</p><h2 id="guard-heading">Originality Guard</h2></div>{guard ? <span className={`verdict verdict-${guard.verdict.toLowerCase()}`}>{guard.verdict}</span> : null}</div>
-            {!guard ? <><p>Run the guard after saving both edits. It checks human authorship and compares this draft with the channel’s back catalogue.</p><button className="guard-action" onClick={() => void runGuard()} disabled={checking}>{checking ? 'Checking originality…' : 'Run Originality Guard'}</button></> : <GuardDetails result={guard} checking={checking} onRun={() => void runGuard()} onFix={() => goToFix(guardTarget(guard))} />}
+            {!guard ? <><p>Run the guard after saving both edits. It checks human authorship and compares this draft with the channel’s back catalogue.</p><button className="guard-action" onClick={() => void runGuard()} disabled={checking}>{checking ? 'Checking originality…' : 'Run Originality Guard'}</button></> : <GuardDetails result={guard} checking={checking} onRun={() => void runGuard()} onFix={() => goToFix(guard.blockedOn)} />}
           </section>
 
           <section className="card">
