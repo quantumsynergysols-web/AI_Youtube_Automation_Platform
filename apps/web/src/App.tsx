@@ -1,5 +1,7 @@
+import type { ReactNode } from 'react'
 import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './lib/auth'
+import { usePageEnter } from './lib/motion'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import VerifyEmail from './pages/VerifyEmail'
@@ -29,6 +31,23 @@ function Home() {
   return me ? <Dashboard /> : <Landing />
 }
 
+/**
+ * Runs the enter transition on every route change.
+ *
+ * Keyed on the path so it replays on navigation; applied here rather than in
+ * each page so a new screen cannot forget it, and so there is exactly one place
+ * to change the timing.
+ */
+function PageEnter({ children }: { children: ReactNode }) {
+  const location = useLocation()
+  const entered = usePageEnter(location.pathname)
+  return (
+    <div className="page-enter" data-entered={String(entered)}>
+      {children}
+    </div>
+  )
+}
+
 function Protected({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth()
   if (loading) return <div className="card"><p className="muted" role="status">Loading your account…</p></div>
@@ -46,19 +65,19 @@ export default function App() {
   // Marketing pages carry their own full-width nav and footer, so they render
   // outside .shell. Reachable signed out — Google requires the legal pages to be
   // public before it will verify the OAuth app.
-  if (!me && !loading && location.pathname === '/') return <Landing />
-  if (location.pathname === '/features') return <Features />
-  if (location.pathname === '/pricing') return <PricingPage />
-  if (location.pathname === '/about') return <About />
-  if (location.pathname === '/privacy') return <Privacy />
-  if (location.pathname === '/terms') return <Terms />
+  if (!me && !loading && location.pathname === '/') return <PageEnter><Landing /></PageEnter>
+  if (location.pathname === '/features') return <PageEnter><Features /></PageEnter>
+  if (location.pathname === '/pricing') return <PageEnter><PricingPage /></PageEnter>
+  if (location.pathname === '/about') return <PageEnter><About /></PageEnter>
+  if (location.pathname === '/privacy') return <PageEnter><Privacy /></PageEnter>
+  if (location.pathname === '/terms') return <PageEnter><Terms /></PageEnter>
   // Auth screens are public too, and carry the same header and footer as the
   // rest of the public site rather than the app chrome.
-  if (location.pathname === '/login') return <Login />
-  if (location.pathname === '/register') return <Register />
-  if (location.pathname === '/forgot-password') return <ForgotPassword />
-  if (location.pathname === '/reset-password') return <ResetPassword />
-  if (location.pathname === '/verify-email') return <VerifyEmail />
+  if (location.pathname === '/login') return <PageEnter><Login /></PageEnter>
+  if (location.pathname === '/register') return <PageEnter><Register /></PageEnter>
+  if (location.pathname === '/forgot-password') return <PageEnter><ForgotPassword /></PageEnter>
+  if (location.pathname === '/reset-password') return <PageEnter><ResetPassword /></PageEnter>
+  if (location.pathname === '/verify-email') return <PageEnter><VerifyEmail /></PageEnter>
 
   return (
     <div className="shell">
@@ -99,6 +118,7 @@ export default function App() {
         </span>
       </nav>
 
+      <PageEnter>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -111,6 +131,7 @@ export default function App() {
         <Route path="/projects/:id/script" element={<Protected><ScriptReview /></Protected>} />
         <Route path="/" element={<Home />} />
       </Routes>
+      </PageEnter>
     </div>
   )
 }

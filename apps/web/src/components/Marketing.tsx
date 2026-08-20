@@ -1,5 +1,6 @@
-import { useEffect, useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import { useReveal, useScrolled } from '../lib/motion'
 import '../landing.css'
 
 /**
@@ -17,90 +18,8 @@ export const GUARD_MENU = [
   { title: 'Altered-content disclosure', note: 'Applied for you when publishing, not left as a checkbox.' },
 ]
 
-/**
- * Reveals elements marked `data-reveal` as they scroll into view.
- *
- * IntersectionObserver rather than a scroll handler, so nothing runs on the
- * main thread between frames. Elements are revealed once and then unobserved —
- * content that re-animates every time you scroll past is a distraction, not an
- * effect.
- *
- * If the visitor asked for reduced motion, everything is shown immediately and
- * the observer is never created. The page must be complete without animation.
- */
-export function useReveal() {
-  useEffect(() => {
-    const nodes = Array.from(document.querySelectorAll<HTMLElement>('[data-reveal]'))
-    if (!nodes.length) return
-
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduced || !('IntersectionObserver' in window)) {
-      nodes.forEach((n) => n.setAttribute('data-revealed', 'true'))
-      return
-    }
-
-    const reveal = (el: Element) => el.setAttribute('data-revealed', 'true')
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return
-          reveal(entry.target)
-          observer.unobserve(entry.target)
-        })
-      },
-      // Fires slightly before the element reaches the fold, so the reveal has
-      // finished by the time it is properly in view.
-      { rootMargin: '0px 0px -8% 0px', threshold: 0.06 },
-    )
-
-    nodes.forEach((n) => observer.observe(n))
-
-    // Anything already on screen is revealed on the next frame rather than
-    // waiting for the observer, so the top of the page is never briefly blank.
-    const raf = requestAnimationFrame(() => {
-      nodes.forEach((n) => {
-        if (n.getBoundingClientRect().top < window.innerHeight) {
-          reveal(n)
-          observer.unobserve(n)
-        }
-      })
-    })
-
-    // Last resort. Hiding content until a callback fires means any failure of
-    // that callback — a background tab that never composites, an observer that
-    // does not run, a browser quirk — leaves the page permanently blank. An
-    // animation is never worth that, so everything shows regardless after a
-    // moment.
-    const failsafe = window.setTimeout(() => {
-      nodes.forEach(reveal)
-      observer.disconnect()
-    }, 1600)
-
-    return () => {
-      cancelAnimationFrame(raf)
-      window.clearTimeout(failsafe)
-      observer.disconnect()
-    }
-  }, [])
-}
-
-/** Adds a shadow to the nav once the page has moved, so it lifts off the content. */
-function useScrolled() {
-  const ref = useRef<HTMLElement | null>(null)
-  useEffect(() => {
-    const onScroll = () => {
-      ref.current?.toggleAttribute('data-scrolled', window.scrollY > 8)
-    }
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-  return ref
-}
-
 export function MarketingNav() {
-  const navRef = useScrolled()
+  const navRef = useScrolled<HTMLElement>()
 
   return (
     <header className="lp-nav" ref={navRef}>

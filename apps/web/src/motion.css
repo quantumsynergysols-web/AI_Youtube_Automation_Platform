@@ -1,0 +1,149 @@
+/*
+ * The motion layer. Every transition in the product is defined here or built
+ * from these tokens, so timing stays consistent instead of each component
+ * inventing its own.
+ *
+ * Three durations and two easings, deliberately. A system with nine of each is
+ * a system nobody follows.
+ */
+
+:root {
+  --t-fast: 130ms;   /* pressed states, colour changes — must feel instant */
+  --t-base: 220ms;   /* hovers, dropdowns, anything the pointer drives */
+  --t-slow: 420ms;   /* entrances, things the page does on its own */
+
+  /* Decelerating. Motion that arrives should slow into place, not stop dead. */
+  --e-out: cubic-bezier(.22, .61, .36, 1);
+  --e-inout: cubic-bezier(.65, .05, .36, 1);
+}
+
+/* ---------- page enter ----------
+   One short move on navigation. Short because it happens on every route change
+   and anything longer becomes a tax on using the product. */
+.page-enter { opacity: 0; transform: translateY(6px); }
+.page-enter[data-entered="true"] {
+  opacity: 1;
+  transform: none;
+  transition: opacity var(--t-slow) var(--e-out), transform var(--t-slow) var(--e-out);
+}
+
+/* ---------- interactive feedback ----------
+   Everything that responds to a pointer says so. Colour alone is easy to miss;
+   a small lift is not. */
+button,
+.button-link,
+.lp-cta,
+a.project-topic,
+.text-link,
+.link-button {
+  transition:
+    background-color var(--t-fast) var(--e-out),
+    border-color var(--t-fast) var(--e-out),
+    color var(--t-fast) var(--e-out),
+    transform var(--t-fast) var(--e-out),
+    box-shadow var(--t-base) var(--e-out);
+}
+button:hover:not(:disabled),
+.button-link:hover { transform: translateY(-1px); }
+/* Pressing returns it under the finger. Without this the button feels like a
+   picture of a button. */
+button:active:not(:disabled),
+.button-link:active,
+.lp-cta:active { transform: translateY(0) scale(.988); transition-duration: 60ms; }
+button:disabled { transition: opacity var(--t-base) var(--e-out); }
+
+input,
+textarea,
+select {
+  transition:
+    border-color var(--t-fast) var(--e-out),
+    box-shadow var(--t-fast) var(--e-out),
+    background-color var(--t-fast) var(--e-out);
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Keyboard focus is visible everywhere, and arrives instantly — a focus ring
+   that fades in reads as lag. */
+:where(a, button, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Cards that lead somewhere lift; cards that are only containers do not. */
+.channel-card,
+.project-row,
+.lp-check,
+.lp-plan {
+  transition: transform var(--t-base) var(--e-out), box-shadow var(--t-base) var(--e-out),
+    border-color var(--t-base) var(--e-out);
+}
+.channel-card:hover { transform: translateY(-2px); box-shadow: 0 16px 32px -24px rgba(11, 26, 21, .34); }
+.project-row { border-radius: 10px; margin-inline: -10px; padding-inline: 10px; }
+.project-row:hover { background: var(--surface-2); }
+
+/* ---------- arriving content ----------
+   Notices and errors slide in. A message that simply appears is easy to miss
+   when your eyes are on the field you just submitted. */
+.notice, .alert {
+  animation: slide-in var(--t-slow) var(--e-out);
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Rows entering a list, staggered just enough to read as a sequence. */
+.project-list > li,
+.channel-grid > * ,
+.scene-list > * {
+  animation: rise var(--t-slow) var(--e-out) backwards;
+}
+.project-list > li:nth-child(1), .channel-grid > *:nth-child(1) { animation-delay: 20ms; }
+.project-list > li:nth-child(2), .channel-grid > *:nth-child(2) { animation-delay: 55ms; }
+.project-list > li:nth-child(3), .channel-grid > *:nth-child(3) { animation-delay: 90ms; }
+.project-list > li:nth-child(4), .channel-grid > *:nth-child(4) { animation-delay: 125ms; }
+.project-list > li:nth-child(n+5), .channel-grid > *:nth-child(n+5) { animation-delay: 160ms; }
+@keyframes rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Disclosure content, so an FAQ or a menu opens rather than snaps. */
+.lp-q summary, .lp-menu-panel { transition: all var(--t-base) var(--e-out); }
+.lp-q[open] > p { animation: rise var(--t-base) var(--e-out); }
+
+/* Modals get a scale so they read as arriving in front of the page. */
+.modal { animation: modal-in var(--t-base) var(--e-out); }
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+.modal-backdrop { animation: fade-in var(--t-base) var(--e-out); }
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* ---------- the opt-out ----------
+   Not a softening — an off switch. Someone who has asked the operating system
+   for less motion has usually done so because motion makes them unwell, and a
+   "subtle" version is still motion. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+  .page-enter { opacity: 1; transform: none; }
+  button:hover:not(:disabled),
+  .button-link:hover,
+  .channel-card:hover,
+  button:active:not(:disabled) { transform: none !important; }
+}
