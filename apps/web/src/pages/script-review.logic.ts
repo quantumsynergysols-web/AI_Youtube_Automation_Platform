@@ -17,17 +17,9 @@ export function generationError(error: unknown): string {
     if (error.status === 502 || error.error.code === 'provider_bad_output') {
       return 'The scriptwriter returned an incomplete draft. Generate again; your project and commentary are unchanged.'
     }
-    return `${error.error.message} Try generating again.`
+    return error.status >= 500 ? `${error.error.message} Try generating again.` : error.error.message
   }
   return 'The script could not be generated. Check your connection, then try again.'
-}
-
-export type GuardTarget = 'hook' | 'commentary' | 'scenes'
-
-export function guardTarget(result: { hookEdited: boolean; hasCommentary: boolean; similarity: number }): GuardTarget {
-  if (result.similarity >= 0.55) return 'scenes'
-  if (!result.hasCommentary) return 'commentary'
-  return 'hook'
 }
 
 /** Tracks only active, focused work and hands callers non-overlapping deltas. */

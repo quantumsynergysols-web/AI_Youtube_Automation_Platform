@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { describe, it } from 'node:test'
 import { ApiFailure } from '../lib/errors.ts'
-import { ActiveTimeAccumulator, generationError, guardTarget } from './script-review.logic.ts'
+import { ActiveTimeAccumulator, generationError } from './script-review.logic.ts'
 
 describe('script review evidence', () => {
   it('emits non-overlapping humanInputMs deltas', () => {
@@ -37,9 +37,10 @@ describe('script review evidence', () => {
     assert.equal(new Set([unavailable, refused, malformed]).size, 3)
   })
 
-  it('routes blocked checks to the fix the API permits', () => {
-    assert.equal(guardTarget({ similarity: 0.7, hookEdited: true, hasCommentary: true }), 'scenes')
-    assert.equal(guardTarget({ similarity: 0.1, hookEdited: false, hasCommentary: false }), 'commentary')
-    assert.equal(guardTarget({ similarity: 0.1, hookEdited: false, hasCommentary: true }), 'hook')
+  it('only recommends retrying failures that may succeed on retry', () => {
+    const missing = generationError(new ApiFailure(404, { code: 'not_found', message: 'No such project.' }))
+    const server = generationError(new ApiFailure(503, { code: 'unavailable', message: 'Provider temporarily unavailable.' }))
+    assert.equal(missing, 'No such project.')
+    assert.match(server, /Try generating again/)
   })
 })
