@@ -1,4 +1,4 @@
-import { GuardVerdict } from '@prisma/client'
+import { GuardBlockReason, GuardVerdict } from '@prisma/client'
 import { prisma } from '../../lib/prisma'
 import { logger } from '../../lib/logger'
 import { badRequest, forbidden, notFound } from '../../lib/errors'
@@ -44,6 +44,13 @@ export interface GuardResult {
   score: number
   similarity: number
   duplicateOf: string | null
+  /**
+   * Which rule blocked, so a client can route the creator to the fix without
+   * re-deriving these thresholds on its side. A duplicated threshold across the
+   * process boundary silently misroutes the moment this service is retuned —
+   * and DUPLICATE_THRESHOLD is explicitly a calibrated value, so it will be.
+   */
+  blockedOn: GuardBlockReason | null
   hookEdited: boolean
   hasCommentary: boolean
   humanInputMs: number
@@ -138,20 +145,24 @@ export async function runOriginalityCheck(projectId: string): Promise<GuardResul
   // Blocking reasons, in the order most useful to act on.
   let verdict: GuardVerdict = GuardVerdict.PASS
   let reason: string | null = null
+  let blockedOn: GuardBlockReason | null = null
 
   if (similarity >= DUPLICATE_THRESHOLD) {
     verdict = GuardVerdict.BLOCKED
+    blockedOn = GuardBlockReason.SIMILARITY
     reason = duplicateOf
       ? `This script closely resembles a video already on the channel (${duplicateOf}). Rewrite it around a different angle, or add material that is genuinely new.`
       : 'This script closely resembles a video already on the channel. Rewrite it around a different angle.'
   } else if (!hasCommentary) {
     verdict = GuardVerdict.BLOCKED
+    blockedOn = GuardBlockReason.COMMENTARY
     reason =
       commentaryWords === 0
         ? 'Add your own commentary before publishing. A video with no original insight is what YouTube demonetises as inauthentic.'
         : `Your commentary is ${commentaryWords} words. Write at least ${MIN_COMMENTARY_WORDS} so the video carries a genuine point of view.`
   } else if (!hookEdited) {
     verdict = GuardVerdict.BLOCKED
+    blockedOn = GuardBlockReason.HOOK
     reason = 'Review and edit the opening hook before publishing. Publishing a generated hook unchanged is the pattern that gets channels flagged.'
   }
 
@@ -170,6 +181,7 @@ export async function runOriginalityCheck(projectId: string): Promise<GuardResul
     score: Number(score.toFixed(3)),
     similarity: Number(similarity.toFixed(3)),
     duplicateOf,
+    blockedOn,
     hookEdited,
     hasCommentary,
     humanInputMs,

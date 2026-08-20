@@ -7,6 +7,12 @@ import { z } from 'zod'
 dotenv.config({ path: path.resolve(__dirname, '../../../../.env') })
 dotenv.config()
 
+/** `KEY=` in a .env file parses as an empty string, which is not the same as set. */
+const blankAsUndefined = z
+  .string()
+  .transform((v) => (v.trim() === '' ? undefined : v))
+  .optional()
+
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   LOG_LEVEL: z.string().default('info'),
@@ -41,6 +47,14 @@ const schema = z.object({
 
   // base64 of 32 random bytes: openssl rand -base64 32
   TOKEN_ENCRYPTION_KEY: z.string().optional(),
+
+  // Generation providers (Phase 2). Each is optional: without one, the routes
+  // that need it report 501 rather than stopping the whole service from booting.
+  // An empty value in .env is treated as absent, so a placeholder line left
+  // unfilled behaves the same as a missing one.
+  ANTHROPIC_API_KEY: blankAsUndefined,
+  ELEVENLABS_API_KEY: blankAsUndefined,
+  FAL_KEY: blankAsUndefined,
 
   SMTP_URL: z.string().optional(),
   MAIL_FROM: z.string().default('ViralPilot <no-reply@viralpilot.io>'),

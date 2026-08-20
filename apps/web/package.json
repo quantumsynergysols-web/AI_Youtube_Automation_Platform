@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "test": "node --experimental-strip-types --test src/pages/channels.logic.test.ts",
+    "test": "node --experimental-strip-types --test src/pages/channels.logic.test.ts src/pages/script-review.logic.test.ts src/pages/projects.logic.test.ts",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
