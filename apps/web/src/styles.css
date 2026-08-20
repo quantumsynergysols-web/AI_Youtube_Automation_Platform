@@ -21,7 +21,7 @@
   --night-ink: #f2f8f8;
   --night-ink-2: #a9c2c4;
   --night-accent: #2ee6c5;
-  font-family: Archivo, "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--ink);
   background: var(--ground);
   font-synthesis: none;

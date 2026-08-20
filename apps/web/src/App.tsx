@@ -7,6 +7,9 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Landing from './pages/Landing'
 import { Privacy, Terms } from './pages/Legal'
+import Features from './pages/Features'
+import PricingPage from './pages/Pricing'
+import About from './pages/About'
 import Dashboard from './pages/Dashboard'
 import Projects from './pages/Projects'
 import Billing from './pages/Billing'
@@ -40,9 +43,13 @@ export default function App() {
   // bands are the thing that stops it reading like every other constrained-column
   // template, and that cannot be done from inside .shell. It brings its own nav
   // and footer.
+  // Marketing pages carry their own full-width nav and footer, so they render
+  // outside .shell. Reachable signed out — Google requires the legal pages to be
+  // public before it will verify the OAuth app.
   if (!me && !loading && location.pathname === '/') return <Landing />
-  // Public, and they carry their own nav — Google requires both reachable
-  // without an account before it will verify the OAuth app.
+  if (location.pathname === '/features') return <Features />
+  if (location.pathname === '/pricing') return <PricingPage />
+  if (location.pathname === '/about') return <About />
   if (location.pathname === '/privacy') return <Privacy />
   if (location.pathname === '/terms') return <Terms />
 

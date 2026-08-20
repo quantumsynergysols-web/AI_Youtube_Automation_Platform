@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import '../landing.css'
+import { MarketingPage } from '../components/Marketing'
 
 /**
  * Privacy policy and terms of service.
@@ -18,26 +18,17 @@ const LAST_UPDATED = '20 August 2026'
 
 function LegalShell({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="lp">
-      <nav className="lp-nav" aria-label="Main navigation">
-        <div className="lp-nav-inner">
-          <Link to="/" className="lp-brand">ViralPilot</Link>
-          <div className="lp-nav-end">
-            <Link to="/login">Sign in</Link>
-            <Link className="lp-cta sm" to="/register">Start free</Link>
-          </div>
-        </div>
-      </nav>
-      <main className="lp-band" id="main-content">
-        <div className="lp-inner lp-legal">
+    <MarketingPage>
+      <section className="lp-band">
+        <div className="lp-inner lp-legal" data-reveal>
           <p className="lp-label">Legal</p>
           <h1 className="lp-display">{title}</h1>
           <p className="lp-legal-date">Last updated {LAST_UPDATED}</p>
           {children}
           <p className="lp-legal-back"><Link to="/">Back to ViralPilot</Link></p>
         </div>
-      </main>
-    </div>
+      </section>
+    </MarketingPage>
   )
 }
 
