@@ -32,8 +32,10 @@ export interface LlmRequest<T> {
 export interface LlmUsage {
   inputTokens: number
   outputTokens: number
-  /** Populated where the provider reports it; 0 elsewhere. */
+  /** Prefix served from cache, billed at a fraction of the input rate. */
   cachedInputTokens: number
+  /** Prefix written to cache this call, billed at a premium over input. */
+  cacheWriteTokens: number
 }
 
 export interface LlmResult<T> {

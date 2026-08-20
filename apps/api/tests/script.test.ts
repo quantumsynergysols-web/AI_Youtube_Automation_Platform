@@ -51,7 +51,7 @@ function fakeProvider(data: ScriptDraft | (() => never)): LlmProvider {
       if (typeof data === 'function') data()
       return {
         data,
-        usage: { inputTokens: 1200, outputTokens: 800, cachedInputTokens: 0 },
+        usage: { inputTokens: 1200, outputTokens: 800, cachedInputTokens: 0, cacheWriteTokens: 0 },
         model: 'fake-model',
         latencyMs: 10,
       }

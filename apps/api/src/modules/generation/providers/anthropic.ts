@@ -87,6 +87,10 @@ export class AnthropicProvider implements LlmProvider {
       inputTokens: message.usage.input_tokens,
       outputTokens: message.usage.output_tokens,
       cachedInputTokens: message.usage.cache_read_input_tokens ?? 0,
+      // Without this the reported cost understates the truth: a cached prefix
+      // leaves input_tokens holding only the uncached remainder, so the system
+      // prompt would vanish from the numbers entirely on the call that writes it.
+      cacheWriteTokens: message.usage.cache_creation_input_tokens ?? 0,
     }
 
     logger.info(
