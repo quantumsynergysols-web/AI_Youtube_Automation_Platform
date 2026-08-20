@@ -1,64 +1,117 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
 import { useAuth } from '../lib/auth'
 import { LoadingState, PageState } from '../components/PageState'
+import { nextAction, stateLabel, type ProjectSummary } from './dashboard.logic'
 
-interface Job { id: string; stage: string; status: string; attempts: number; result: { echo?: string } | null; error: string | null; enqueuedAt: string }
-interface JobsResponse { jobs: Job[]; queue: { pending: number; processing: number; dead: number } }
+/**
+ * The signed-in workspace view.
+ *
+ * Replaces the Phase 0 queue probe, which was developer scaffolding: it showed
+ * job rows and a dummy-enqueue button, neither of which tells a creator what
+ * needs their attention. This answers one question instead — what is waiting on
+ * me — because the guard blocks on human input, so a stalled project is almost
+ * always stalled on the person rather than on the machine.
+ */
+
+interface ProjectsResponse {
+  projects: ProjectSummary[]
+  nextCursor: string | null
+}
 
 export default function Dashboard() {
   const { me } = useAuth()
-  const [data, setData] = useState<JobsResponse | null>(null)
-  const dataRef = useRef<JobsResponse | null>(null)
+  const [data, setData] = useState<ProjectsResponse | null>(null)
   const [loadError, setLoadError] = useState(false)
-  const [actionError, setActionError] = useState<string | null>(null)
-  const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
     try {
-      const response = await api<JobsResponse>('/api/jobs')
-      dataRef.current = response
-      setData(response)
+      setData(await api<ProjectsResponse>('/api/projects?limit=8'))
       setLoadError(false)
     } catch {
-      if (!dataRef.current) setLoadError(true)
+      setLoadError(true)
     }
   }, [])
 
-  useEffect(() => {
-    void load()
-    const timer = setInterval(() => void load(), 2000)
-    return () => clearInterval(timer)
-  }, [load])
-
-  async function runProbe(consume: boolean) {
-    setActionError(null)
-    setBusy(true)
-    try {
-      await api(`/api/jobs/dummy${consume ? '?consume=1' : ''}`, { method: 'POST', body: JSON.stringify({ message: 'gate G0 probe', delayMs: 500 }) })
-      await load()
-    } catch {
-      setActionError('The queue probe could not be started. Check that the API and worker are running, then try again.')
-    } finally { setBusy(false) }
-  }
+  useEffect(() => { void load() }, [load])
 
   const sub = me?.subscription
+  const projects = data?.projects ?? []
+  const waiting = projects.filter((p) => nextAction(p).urgent)
+
   return (
     <main className="stack page" id="main-content">
-      <header className="page-header"><div><p className="eyebrow">Workspace overview</p><h1>Dashboard</h1><p>Review the work, protect your channel, and decide what gets published.</p></div></header>
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Workspace</p>
+          <h1>Your videos</h1>
+          <p>Review the work, protect the channel, and decide what gets published.</p>
+        </div>
+        <Link className="button-link" to="/projects">New video</Link>
+      </header>
+
       <section className="card">
-        <div className="section-heading"><h2>Current usage</h2><span className="status-badge">{sub?.plan ?? 'No plan'}</span></div>
-        <p>{sub?.videosUsed ?? 0} videos used this period{sub?.periodEnd ? ` · renews ${new Date(sub.periodEnd).toLocaleDateString()}` : ''}</p>
-        {actionError ? <div className="notice error" role="alert">{actionError}</div> : null}
-        <div className="row"><button onClick={() => void runProbe(false)} disabled={busy}>{busy ? 'Starting…' : 'Run queue probe'}</button><button className="secondary" onClick={() => void runProbe(true)} disabled={busy}>Run and consume allowance</button></div>
-        {data ? <p className="muted">Queue · {data.queue.pending} pending · {data.queue.processing} processing · {data.queue.dead} dead</p> : null}
+        <div className="section-heading">
+          <h2>This period</h2>
+          <span className="status-badge">{sub?.plan ?? 'No plan'}</span>
+        </div>
+        <p>
+          {sub?.videosUsed ?? 0} videos used
+          {sub?.periodEnd ? ` · renews ${new Date(sub.periodEnd).toLocaleDateString()}` : ''}
+        </p>
+        {waiting.length > 0 ? (
+          <p className="notice warn" role="status">
+            {waiting.length === 1
+              ? '1 video is waiting on you before it can publish.'
+              : `${waiting.length} videos are waiting on you before they can publish.`}
+          </p>
+        ) : null}
       </section>
-      <section className="card" aria-labelledby="recent-jobs">
-        <div className="section-heading"><h2 id="recent-jobs">Recent jobs</h2>{data ? <span className="count-badge">{data.jobs.length}</span> : null}</div>
-        {!data && !loadError ? <LoadingState label="Loading recent jobs" /> : null}
-        {loadError ? <PageState title="Jobs did not load" tone="error" action={<button onClick={() => void load()}>Try again</button>}><p>Recent activity could not be loaded. Check that the API and Redis are available, then retry.</p></PageState> : null}
-        {data?.jobs.length === 0 ? <PageState title="No jobs yet"><p>Your production activity will appear here for review. You stay in control of what moves forward and what gets published.</p></PageState> : null}
-        {data?.jobs.length ? <div className="table-scroll"><table><thead><tr><th>Job</th><th>Stage</th><th>Status</th><th>Attempts</th><th>Result</th></tr></thead><tbody>{data.jobs.map((job) => <tr key={job.id}><td><code>{job.id.slice(0, 8)}</code></td><td>{job.stage}</td><td><span className="status-badge">{job.status}</span></td><td>{job.attempts}</td><td className="muted">{job.result?.echo ?? job.error ?? '—'}</td></tr>)}</tbody></table></div> : null}
+
+      <section className="card" aria-labelledby="recent-projects">
+        <div className="section-heading">
+          <h2 id="recent-projects">Recent videos</h2>
+          {projects.length ? <Link className="text-link" to="/projects">See all</Link> : null}
+        </div>
+
+        {!data && !loadError ? <LoadingState label="Loading your videos" /> : null}
+
+        {loadError ? (
+          <PageState title="Videos did not load" tone="error" action={<button onClick={() => void load()}>Try again</button>}>
+            <p>Your videos could not be loaded. Check that the API is running, then retry.</p>
+          </PageState>
+        ) : null}
+
+        {data && projects.length === 0 ? (
+          <PageState title="No videos yet" action={<Link className="button-link" to="/projects">Create your first video</Link>}>
+            <p>
+              Start with a topic. ViralPilot writes the script and the shot list; you rewrite the
+              hook and add your own point of view before anything can publish.
+            </p>
+          </PageState>
+        ) : null}
+
+        {projects.length ? (
+          <ul className="project-list">
+            {projects.map((project) => {
+              const action = nextAction(project)
+              return (
+                <li key={project.id} className="project-row">
+                  <div className="project-main">
+                    <Link className="project-topic" to={`/projects/${project.id}/script`}>{project.topic}</Link>
+                    <p className="muted">
+                      {stateLabel(project.state)} · {project.targetDurationSec}s
+                      {project.channel ? ` · ${project.channel.title}` : ' · no channel'}
+                      {project.script ? ` · ${project.script.wordCount} words` : ''}
+                    </p>
+                  </div>
+                  <span className={`next-action${action.urgent ? ' urgent' : ''}`}>{action.label}</span>
+                </li>
+              )
+            })}
+          </ul>
+        ) : null}
       </section>
     </main>
   )

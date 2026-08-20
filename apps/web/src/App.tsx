@@ -5,10 +5,24 @@ import Register from './pages/Register'
 import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
+import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
 import Billing from './pages/Billing'
 import Channels from './pages/Channels'
 import ScriptReview from './pages/ScriptReview'
+
+/**
+ * The root is the marketing page for a visitor and the workspace for a customer.
+ *
+ * Sending logged-out traffic to /login instead — which is what happened before —
+ * asks someone who has never heard of the product to authenticate to something
+ * they cannot see.
+ */
+function Home() {
+  const { me, loading } = useAuth()
+  if (loading) return <div className="card"><p className="muted" role="status">Loading…</p></div>
+  return me ? <Dashboard /> : <Landing />
+}
 
 function Protected({ children }: { children: JSX.Element }) {
   const { me, loading } = useAuth()
@@ -25,9 +39,23 @@ export default function App() {
       <nav aria-label="Main navigation">
         <Link to="/" className="brand">ViralPilot</Link>
         <div className="nav-links">
-          <NavLink to="/" end>Dashboard</NavLink>
-          <NavLink to="/channels">Channels</NavLink>
-          <NavLink to="/billing">Billing</NavLink>
+          {me ? (
+            <>
+              <NavLink to="/" end>Dashboard</NavLink>
+              <NavLink to="/projects">Videos</NavLink>
+              <NavLink to="/channels">Channels</NavLink>
+              <NavLink to="/billing">Billing</NavLink>
+            </>
+          ) : (
+            // Marketing nav. A landing page with sections and no way to reach
+            // them makes a visitor scroll to find out whether it is worth
+            // scrolling.
+            <>
+              <a href="#how">How it works</a>
+              <a href="#guard">The guard</a>
+              <a href="#pricing">Pricing</a>
+            </>
+          )}
         </div>
         <span className="account-nav">
           {me ? (
@@ -36,7 +64,10 @@ export default function App() {
               <button className="link-button" onClick={() => void signOut()}>Sign out</button>
             </>
           ) : (
-            <Link to="/login">Sign in</Link>
+            <>
+              <Link to="/login">Sign in</Link>
+              <Link className="button-link nav-cta" to="/register">Start free</Link>
+            </>
           )}
         </span>
       </nav>
@@ -50,7 +81,7 @@ export default function App() {
         <Route path="/billing" element={<Protected><Billing /></Protected>} />
         <Route path="/channels" element={<Protected><Channels /></Protected>} />
         <Route path="/projects/:id/script" element={<Protected><ScriptReview /></Protected>} />
-        <Route path="/" element={<Protected><Dashboard /></Protected>} />
+        <Route path="/" element={<Home />} />
       </Routes>
     </div>
   )
