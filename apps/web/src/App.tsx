@@ -6,6 +6,7 @@ import VerifyEmail from './pages/VerifyEmail'
 import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Landing from './pages/Landing'
+import { Privacy, Terms } from './pages/Legal'
 import Dashboard from './pages/Dashboard'
 import Projects from './pages/Projects'
 import Billing from './pages/Billing'
@@ -40,6 +41,10 @@ export default function App() {
   // template, and that cannot be done from inside .shell. It brings its own nav
   // and footer.
   if (!me && !loading && location.pathname === '/') return <Landing />
+  // Public, and they carry their own nav — Google requires both reachable
+  // without an account before it will verify the OAuth app.
+  if (location.pathname === '/privacy') return <Privacy />
+  if (location.pathname === '/terms') return <Terms />
 
   return (
     <div className="shell">

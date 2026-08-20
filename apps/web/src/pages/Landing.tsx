@@ -361,8 +361,59 @@ export default function Landing() {
 
       <footer className="lp-foot">
         <div className="lp-foot-inner">
-          <p>ViralPilot — a Quantum Synergy Solutions product</p>
-          <p><Link to="/login">Sign in</Link></p>
+          <div className="lp-foot-top">
+            <div className="lp-foot-brand">
+              <Link to="/" className="lp-brand">ViralPilot</Link>
+              <p>
+                AI production for creators who already earn from their channel. Built to
+                refuse work that would put your monetisation at risk.
+              </p>
+              <span className="lp-foot-badge">
+                <b>Read-only</b> until you choose to publish
+              </span>
+            </div>
+
+            <div className="lp-foot-col">
+              <h3>Product</h3>
+              <ul>
+                <li><a href="#how">How it works</a></li>
+                <li><a href="#guard">The Originality Guard</a></li>
+                <li><a href="#stakes">Why it matters</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+              </ul>
+            </div>
+
+            <div className="lp-foot-col">
+              <h3>Account</h3>
+              <ul>
+                <li><Link to="/register">Create an account</Link></li>
+                <li><Link to="/login">Sign in</Link></li>
+                <li><Link to="/forgot-password">Reset password</Link></li>
+              </ul>
+            </div>
+
+            <div className="lp-foot-col">
+              <h3>Legal</h3>
+              <ul>
+                <li><Link to="/privacy">Privacy policy</Link></li>
+                <li><Link to="/terms">Terms of service</Link></li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="lp-foot-bottom">
+            <p>© {new Date().getFullYear()} Quantum Synergy Solutions. All rights reserved.</p>
+            {/*
+              Stated here as well as in the product. YouTube requires altered-content
+              disclosure on synthetic media, and a tool that sells itself on compliance
+              should not be quiet about the fact that it produces exactly that.
+            */}
+            <p className="lp-foot-note">
+              Videos produced with ViralPilot use synthetic voice and generated visuals, and
+              are disclosed as altered content when published. ViralPilot is not affiliated
+              with, endorsed by, or sponsored by YouTube or Google.
+            </p>
+          </div>
         </div>
       </footer>
     </div>
