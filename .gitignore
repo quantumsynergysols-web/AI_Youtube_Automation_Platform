@@ -22,3 +22,5 @@ docs/*.pdf
 
 # Agent worktrees — Codex checks branches out under here. Never part of a commit.
 .worktrees/
+dist-share/
+share.html
