@@ -132,6 +132,11 @@ export function MarketingNav() {
             </div>
           </div>
 
+          {/* The dropdown needs hover or focus, neither of which exists on a
+              phone, so below the breakpoint it collapses to a plain link and
+              the trigger is hidden. */}
+          <NavLink to="/features#guard" className="lp-only-mobile">The guard</NavLink>
+
           <NavLink to="/pricing">Pricing</NavLink>
           <NavLink to="/about">About</NavLink>
         </nav>

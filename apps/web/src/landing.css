@@ -308,9 +308,19 @@
   .lp-foot-brand { grid-column: 1 / -1; }
 }
 
+/* Shown only once the dropdown is no longer usable. */
+.lp-only-mobile { display: none !important; }
+
 @media (max-width: 880px) {
-  .lp-nav-links { display: none; }
-  .lp-nav-inner { height: 60px; }
+  /* The links wrap onto their own row rather than disappearing. Hiding them
+     made Features, Pricing and About unreachable on a phone — the nav looked
+     tidy and the site lost three of its five pages. */
+  .lp-nav-inner { height: auto; flex-wrap: wrap; padding: 10px 0; row-gap: 4px; }
+  .lp-nav-links { order: 3; width: 100%; margin-left: 0; gap: 2px; flex-wrap: wrap; }
+  .lp-nav-links > a { flex: 1 1 auto; justify-content: center; min-height: 44px; }
+  .lp-only-mobile { display: inline-flex !important; }
+  .lp-menu { display: none; }
+  .lp-nav-end { margin-left: auto; }
   .lp-pagehead { padding: 46px 0 6px; }
 }
 
