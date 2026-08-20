@@ -61,8 +61,12 @@ implies a state.
 
 ## 3. Typography
 
-**Archivo**, loaded in `index.html`, with a system fallback. One variable family
-covers display and body, so the whole identity costs a single request.
+**Bricolage Grotesque** for display, **Archivo** for body. Both loaded in
+`index.html` with a system fallback.
+
+Bricolage has optical sizing and real character at large sizes, which is what makes a
+headline look drawn rather than defaulted. It is deliberately *not* used for body copy —
+its personality gets in the way of reading at 15px, which is Archivo's job.
 
 > Reversing an earlier rule in this document. The first version said "do not add a
 > webfont", which was a decision made for simplicity and was wrong. A system stack is
@@ -85,19 +89,27 @@ covers display and body, so the whole identity costs a single request.
 
 ---
 
-## 3b. Light app, dark marketing
+## 3b. Two surfaces, one product
 
-The signed-in product is light — it is a working tool, used for long stretches, and
-a dark editor is a preference rather than a default. Marketing surfaces open dark:
-the hero and the closing band. That contrast is the point, and it is why the
-`--night-*` tokens exist rather than raw hex.
+The **app is light**. It is a working tool used for long stretches, and a dark editor is
+a preference rather than a default.
 
-Dark sections get **one** soft light source — a single radial glow, off-canvas,
-top-right. It gives a flat rectangle the read of a lit surface for the cost of a
-gradient. Do not add a second one; two light sources look like a mistake.
+The **marketing page is dark** — near-black with a green signal — and it lives outside
+`.shell` in its own stylesheet (`src/landing.css`, all classes namespaced `lp-`). That
+separation is deliberate: marketing needs edge-to-edge bands and a display face at 88px,
+and neither belongs in the app's stylesheet where it would leak into product screens.
 
-`--night-accent` (`#2ee6c5`) only appears on dark. On light, the accent is
-`--accent`. The same colour at the same value cannot serve both grounds.
+**White is a material, not a text colour.** Whole bands invert to near-white
+(`.lp-band.white`), and the featured plan inverts back to near-black inside them.
+Alternating full-bleed dark and white is the single thing that stops a marketing page
+reading like a constrained-column template, and it does more work than any gradient.
+It also means the green never has to shout to be seen.
+
+**One light source per dark section.** A single off-canvas radial glow gives a flat
+rectangle the read of a lit surface. Two look like a mistake.
+
+Green (`--lp-green`) means cleared, red (`--lp-red`) means blocked. Those are the
+product's own semantics, so the palette states the thesis before a word is read.
 
 ## 4. Layout
 
@@ -219,36 +231,32 @@ state.
 
 ## 10. Marketing pages
 
-Derived from reviewing Ocoya, Sera and Quantum Framer. Structural patterns worth
-keeping, not aesthetics worth copying.
+**Section order.** Hero → the stakes → how it works → the differentiator → proof → who
+it is for → pricing → FAQ → closing. A visitor should be able to stop after any section
+and have learned something complete.
 
-**Section order that works.** Hero → the problem → how it works → the differentiator →
-proof → who it is for → pricing → FAQ → closing CTA. `Landing.tsx` follows exactly
-this. A visitor should be able to stop after any section and have learned something
-complete.
+**Band rhythm carries the layout.** Dark, white, dark, void, dark, white, dark, green.
+The inversions are the structure; without them the page is nine stacked sections in one
+colour, which is the definition of generic.
 
-**Proof beats claims, and it is the section most often skipped.** Sera shows real
-replies its product generated rather than describing them. The equivalent here is
-showing an actual generated hook next to an actual guard refusal — the refusal is the
-more persuasive of the two, because a product that shows itself saying no is making a
-claim it cannot fake. When you add a feature, ask what artifact it produces and show
-that instead of adjectives.
+**Proof beats claims.** The hero shows the real verdict panel — Blocked, 71% similarity,
+the actual refusal copy — built from the app's own vocabulary rather than a screenshot or
+an illustration. A tool that shows itself saying no is making a claim it cannot fake.
 
-**Nav has to reach the sections.** A long page with no in-page nav makes a visitor
-scroll to work out whether scrolling is worth it. Signed-out nav is `How it works`,
-`The guard`, `Pricing`, then `Sign in` and a primary CTA. Signed-in nav is the app.
-The two never mix.
+**Numbers must be true.** The figures band states product facts (four checks, zero
+unchecked publishes, 90-second cap, three free videos), never adoption or performance
+metrics. There are no customers yet, and inventing social proof is the one thing this
+page cannot afford — the entire pitch is that the product refuses to fake things.
 
-**Name who it is not for.** Quantum Framer's "Honest status: live and evolving" is the
-same instinct. Saying plainly that this is the wrong tool for someone who wants a
-hundred unread videos a month costs a few unqualified signups and buys credibility with
-exactly the audience that can afford the product.
+**Name who it is not for.** Saying plainly that this is the wrong tool for someone who
+wants a hundred unread videos a month costs a few unqualified signups and buys
+credibility with the audience that can actually pay.
 
-**FAQ is objection handling, not documentation.** Answer the thing a sceptical creator
-is actually thinking — "will this get my channel banned", "can I turn the guard off" —
-and answer it straight, including when the answer is no.
+**FAQ is objection handling, not documentation.** Answer what a sceptical creator is
+actually thinking — "will this get me demonetised", "can I turn the guard off" — and
+answer straight, including when the answer is no.
 
-**On the reference sites' aesthetics:** Ocoya and Quantum Framer are dark; Sera runs an
-80px ultralight headline. Do not port those here. The app itself is light, and a dark
-marketing page handing off to a light product reads as two different products. The
-confidence in those headlines is worth taking; the palette is not.
+**On the reference sites:** LaunchPad YT, Ocoya, Sera and Quantum Framer were reviewed
+for structure. Taken: the dark treatment, the before/after comparison, heavy display
+type, the figures band, proof over claims. Not taken: their palettes, and any social
+proof we have not earned.

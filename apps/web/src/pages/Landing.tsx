@@ -1,309 +1,370 @@
 import { Link } from 'react-router-dom'
+import '../landing.css'
 
 /**
  * The public face of ViralPilot.
  *
- * Written around the one thing that separates this from every "AI video
- * generator": YouTube's Inauthentic Content policy demonetises mass-produced
- * output at channel level, so shipping volume is the risk rather than the
- * product. The Originality Guard is what is actually being sold, and the page
- * leads with it instead of burying it under a feature list.
+ * Runs outside .shell so bands can go edge to edge, and brings its own nav and
+ * footer. Written around the one thing that separates this from every other AI
+ * video tool: YouTube demonetises mass-produced output at channel level, so
+ * volume is the risk rather than the feature. The guard is the product, and the
+ * page leads with it rather than burying it in a feature list.
  */
+
+/**
+ * Facts about how the product works, not performance claims. There are no
+ * customers yet, so there are no adoption numbers to put here — inventing them
+ * would be the one thing this page cannot afford to do.
+ */
+const FIGURES = [
+  { n: '4', label: 'checks every video clears before it can publish' },
+  { n: '0', label: 'videos that publish without passing them' },
+  { n: '90s', label: 'maximum length, identical on every plan' },
+  { n: '3', label: 'free videos, no card required' },
+]
 
 const STEPS = [
   {
     n: '01',
     title: 'Connect your channel',
-    body: 'ViralPilot reads your back catalogue so it knows what you have already covered. Read-only until you choose to publish.',
+    body: 'ViralPilot imports your back catalogue so it knows what you have already covered. Read-only — nothing can be posted until you say so.',
   },
   {
     n: '02',
     title: 'Give it a topic',
-    body: 'It writes a structured script — hook, body, call to action — plus an art-direction bible and a shot prompt for every scene.',
+    body: 'You get a structured script — hook, body, call to action — an art-direction bible that holds the visuals together, and a shot prompt for every scene.',
   },
   {
     n: '03',
     title: 'Make it yours',
-    body: 'Rewrite the hook. Add the insight only you can stand behind. The draft never invents your experience, so there is a real gap for you to fill.',
+    body: 'Rewrite the hook. Add the insight only you can stand behind. The draft never invents your experience, so there is a real gap left for you to fill.',
   },
   {
     n: '04',
-    title: 'Pass the guard, then publish',
-    body: 'Every video is checked against your own catalogue and for genuine human authorship before it can go out.',
+    title: 'Clear the guard, then publish',
+    body: 'Checked against your own catalogue and for genuine human authorship. Blocked means blocked — there is no override button anywhere in the product.',
   },
 ]
 
-const GUARD_CHECKS = [
+const CHECKS = [
   {
     title: 'Duplication of your own work',
-    body: 'Scripts are scored against your channel’s back catalogue. Too close to a video you already made and it will not publish — the angle has to be new, not just the wording.',
+    body: 'Every script is scored against your channel’s back catalogue. Too close to something you already made and it will not publish. The angle has to be new, not just the wording.',
   },
   {
     title: 'Evidence a human was involved',
-    body: 'The generated hook has to be rewritten and your own commentary has to be there. Saving the draft untouched does not count, because a click is not authorship.',
+    body: 'The generated hook must be rewritten and your own commentary must be there. Saving the draft untouched does not count, because a click is not authorship.',
   },
   {
     title: 'Publishing cadence',
-    body: 'Uploading far faster than usual is flagged before it becomes the pattern that draws attention to a channel.',
+    body: 'Uploading far faster than your channel normally does is flagged before it becomes the pattern that gets a channel looked at.',
   },
   {
-    title: 'Disclosure',
-    body: 'Synthetic voice and generated visuals are disclosed as YouTube requires. Not optional, not a checkbox you can forget.',
+    title: 'Altered-content disclosure',
+    body: 'Synthetic voice and generated visuals are disclosed the way YouTube requires. Handled for you, not left as a checkbox you can forget.',
   },
 ]
 
 const PLANS = [
-  { name: 'Free', price: '$0', videos: '3 videos / month', channels: '1 channel' },
-  { name: 'Starter', price: '$29', videos: '10 videos / month', channels: '1 channel' },
-  { name: 'Creator', price: '$79', videos: '30 videos / month', channels: '1 channel', featured: true },
-  { name: 'Pro', price: '$199', videos: '90 videos / month', channels: '3 channels' },
-  { name: 'Studio', price: '$399', videos: '200 videos / month', channels: '10 channels' },
+  { name: 'Free', price: '$0', videos: '3 videos a month', channels: '1 channel' },
+  { name: 'Starter', price: '$29', videos: '10 videos a month', channels: '1 channel' },
+  { name: 'Creator', price: '$79', videos: '30 videos a month', channels: '1 channel', pick: true },
+  { name: 'Pro', price: '$199', videos: '90 videos a month', channels: '3 channels' },
+  { name: 'Studio', price: '$399', videos: '200 videos a month', channels: '10 channels' },
 ]
 
 const AUDIENCE = {
   yes: [
     'You already earn from your channel and cannot afford a monetisation review.',
     'You publish regularly and the bottleneck is production time, not ideas.',
-    'You want to be in the edit, not to hand the channel to an autopilot.',
+    'You want to stay in the edit, not hand your channel to an autopilot.',
   ],
   no: [
-    'You want a hundred videos a month with nobody reading them. That is the pattern this refuses to produce.',
-    'You want to publish about a topic you know nothing about. The guard requires your own point of view, and it can tell the difference.',
-    'You want the tool to impersonate you. It writes the setup and leaves the personal specifics blank on purpose.',
+    'You want a hundred videos a month that nobody reads. That is the pattern this refuses to produce.',
+    'You want to publish about something you know nothing about. The guard needs your point of view, and it can tell.',
+    'You want it to impersonate you. It writes the setup and leaves the personal specifics blank, deliberately.',
   ],
 }
 
 const FAQ = [
   {
-    q: 'Does this get my channel banned?',
-    a: 'The opposite is the entire design goal. YouTube penalises mass-produced, low-effort content — so ViralPilot refuses to publish work that looks like that, checks every script against your own back catalogue, and requires evidence you actually shaped it. It also handles the altered-content disclosure YouTube requires for synthetic voice and visuals.',
+    q: 'Will this get my channel demonetised?',
+    a: 'Preventing that is the entire design goal. YouTube penalises mass-produced, low-effort content, so ViralPilot refuses to publish work that looks like that — it scores every script against your own back catalogue, requires evidence you actually shaped it, and handles the altered-content disclosure YouTube asks for. It is the only tool in this category built to say no to you.',
   },
   {
     q: 'Can I turn the Originality Guard off?',
-    a: 'No. That is deliberate. The version of this product where the guard is optional is the version that eventually costs someone their monetisation, and it would also make every other claim here meaningless.',
+    a: 'No, and there is no paid tier that unlocks it. The version of this product where the guard is optional is the version that eventually costs somebody their monetisation, and it would make every other claim on this page meaningless.',
   },
   {
     q: 'Will it write in my voice?',
-    a: 'It writes structure, pacing and a shot list. It will not invent your experience — no fabricated anecdotes, no numbers it cannot know. Where a personal story belongs it writes the setup and leaves the specific to you, because a script that lies on your behalf is worse than no script.',
+    a: 'It writes structure, pacing and a shot list. It will not invent your experience — no fabricated anecdotes, no statistics it cannot know. Where a personal story belongs it writes the setup and leaves the specific to you, because a script that lies on your behalf is worse than no script at all.',
   },
   {
-    q: 'How long does a video take?',
-    a: 'A script comes back in under a minute. The part that takes real time is yours: rewriting the hook and adding your own commentary. That is the work the guard is checking for, so it is not something the product tries to shorten.',
+    q: 'How long does one video take?',
+    a: 'The script comes back in under a minute. The part that takes real time is yours: rewriting the hook and writing your own commentary. That is exactly the work the guard is checking for, so it is not something the product tries to shorten.',
   },
   {
-    q: 'What happens when a script is too similar to something I have made?',
-    a: 'It is blocked before publishing, and named — you are told which video it resembles. You can rewrite the scenes that overlap, or regenerate for a different angle. Rewriting is usually faster and keeps the parts that were already good.',
+    q: 'What happens when a script is too close to something I have already made?',
+    a: 'It is blocked before publishing and the video it resembles is named. You can rewrite the scenes that overlap, or regenerate for a different angle entirely. Rewriting is usually faster and keeps the parts that were already working.',
   },
 ]
 
 export default function Landing() {
   return (
-    <main className="landing" id="main-content">
-      <section className="hero">
-        <div className="hero-copy">
-          <span className="pill">For channels that are already monetised</span>
-          <h1>
-            Publish more.<br />
-            <span className="hero-em">Risk nothing.</span>
-          </h1>
-          <p className="hero-lede">
-            YouTube demonetises mass-produced video at channel level — every upload you
-            have ever made, at once. ViralPilot is the only one of these tools built to
-            refuse that work rather than mass-produce it.
-          </p>
-          <div className="row hero-actions">
-            <Link className="button-link" to="/register">Start free — 3 videos</Link>
-            <a className="button-link ghost-link" href="#guard">See how the guard works</a>
+    <div className="lp">
+      <nav className="lp-nav" aria-label="Main navigation">
+        <div className="lp-nav-inner">
+          <Link to="/" className="lp-brand">ViralPilot</Link>
+          <div className="lp-nav-links">
+            <a href="#stakes">Why it matters</a>
+            <a href="#how">How it works</a>
+            <a href="#guard">The guard</a>
+            <a href="#pricing">Pricing</a>
           </div>
-          <p className="hero-note">No card required · Your channel stays read-only until you publish</p>
+          <div className="lp-nav-end">
+            <Link to="/login">Sign in</Link>
+            <Link className="lp-cta sm" to="/register">Start free</Link>
+          </div>
         </div>
+      </nav>
 
-        {/*
-          The product, not a stock illustration. This is the verdict panel a
-          creator actually sees, rendered from the same vocabulary the app uses —
-          a tool that shows itself refusing to publish is making a claim it
-          cannot fake, which is a stronger opening than any adjective.
-        */}
-        <aside className="hero-visual" aria-label="Example of a blocked originality check">
-          <div className="verdict-panel">
-            <div className="verdict-head">
-              <span className="verdict-label">Originality Guard</span>
-              <span className="verdict-chip blocked">Blocked</span>
+      <main id="main-content">
+        <header className="lp-hero">
+          <div className="lp-inner">
+            <div className="lp-hero-grid">
+              <div>
+                <span className="lp-tag">For channels that are already monetised</span>
+                <h1 className="lp-display">
+                  Publish more.<br /><em>Risk nothing.</em>
+                </h1>
+                <p className="lp-lede">
+                  YouTube demonetises mass-produced video at channel level — every upload you
+                  have ever made, all at once. ViralPilot is built to refuse that work rather
+                  than mass-produce it.
+                </p>
+                <div className="lp-hero-actions">
+                  <Link className="lp-cta" to="/register">Start free — 3 videos</Link>
+                  <a className="lp-cta ghost" href="#guard">See how the guard works</a>
+                </div>
+                <p className="lp-hero-note">
+                  No card required · Your channel stays read-only until you publish
+                </p>
+              </div>
+
+              {/*
+                The product, not an illustration. This is the panel a creator
+                actually sees, built from the app's own vocabulary. A tool that
+                shows itself refusing to publish is making a claim it cannot fake.
+              */}
+              <aside className="lp-panel" aria-label="Example of a blocked originality check">
+                <div className="lp-panel-head">
+                  <span className="lp-panel-title">Originality Guard</span>
+                  <span className="lp-chip stop">Blocked</span>
+                </div>
+                <p className="lp-panel-reason">
+                  This script closely resembles a video already on the channel. Rewrite it
+                  around a different angle, or add material that is genuinely new.
+                </p>
+                <dl className="lp-rows">
+                  <div><dt>Catalogue similarity</dt><dd className="stop">71%</dd></div>
+                  <div><dt>Hook rewritten</dt><dd className="stop">No</dd></div>
+                  <div><dt>Your commentary</dt><dd className="go">42 words</dd></div>
+                </dl>
+                <p className="lp-panel-foot">Publishing stays locked until this passes.</p>
+              </aside>
             </div>
-            <p className="verdict-reason">
-              This script closely resembles a video already on the channel. Rewrite it around
-              a different angle, or add material that is genuinely new.
-            </p>
-            <dl className="verdict-stats">
-              <div><dt>Catalogue similarity</dt><dd className="bad">71%</dd></div>
-              <div><dt>Hook rewritten</dt><dd className="bad">No</dd></div>
-              <div><dt>Your commentary</dt><dd className="good">42 words</dd></div>
-            </dl>
-            <p className="verdict-foot">Publishing stays locked until this passes.</p>
-          </div>
-        </aside>
-      </section>
 
-      <section className="landing-section" aria-labelledby="stakes">
-        <p className="eyebrow">The stakes</p>
-        <h2 id="stakes">Same volume. Opposite outcome.</h2>
-        <p className="section-lede">
-          Both columns publish thirty videos a month. Only one of them is still monetised
-          at the end of it.
-        </p>
-        <div className="versus">
-          <div className="versus-col bad">
-            <span className="versus-tag">Every other AI video tool</span>
-            <ul>
-              <li>Optimises for how many videos you can ship</li>
-              <li>Reuses your own angles back at you without noticing</li>
-              <li>Writes a personal story you never lived</li>
-              <li>Publishes whatever it generated, unread</li>
-              <li>Leaves disclosure to you to remember</li>
-            </ul>
-            <p className="versus-end">Channel-level demonetisation. Every upload, at once.</p>
-          </div>
-          <div className="versus-col good">
-            <span className="versus-tag">ViralPilot</span>
-            <ul>
-              <li>Optimises for how many videos you can safely publish</li>
-              <li>Scores every script against your back catalogue and blocks duplicates</li>
-              <li>Leaves the personal specifics blank, on purpose, for you</li>
-              <li>Refuses to publish until you have rewritten the hook</li>
-              <li>Handles altered-content disclosure automatically</li>
-            </ul>
-            <p className="versus-end">A record of human authorship on every video you ship.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-section" aria-labelledby="how">
-        <p className="eyebrow">How it works</p>
-        <h2 id="how">Four steps, and you are in control of two of them.</h2>
-        <ol className="steps">
-          {STEPS.map((step) => (
-            <li key={step.n} className="step">
-              <span className="step-n" aria-hidden="true">{step.n}</span>
-              <h3>{step.title}</h3>
-              <p>{step.body}</p>
-            </li>
-          ))}
-        </ol>
-      </section>
-
-      <section className="landing-section guard-section" aria-labelledby="guard">
-        <p className="eyebrow">The part that matters</p>
-        <h2 id="guard">The Originality Guard blocks. It does not warn.</h2>
-        <p className="section-lede">
-          A warning you can click past is not protection. Nothing publishes until these pass,
-          and the thresholds are not yours to turn off — because the version of this product
-          where you can disable the guard is the version that gets your channel demonetised.
-        </p>
-        <div className="guard-grid">
-          {GUARD_CHECKS.map((check) => (
-            <div key={check.title} className="guard-card">
-              <h3>{check.title}</h3>
-              <p>{check.body}</p>
+            <div className="lp-figures">
+              {FIGURES.map((f) => (
+                <div key={f.label} className="lp-figure">
+                  <b>{f.n}</b>
+                  <span>{f.label}</span>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
-        <p className="muted guard-footnote">
-          Every check is recorded against the video — what changed, how long you spent, what it
-          was compared against. If a decision ever has to be appealed, that record is the
-          evidence.
-        </p>
-      </section>
-
-      <section className="landing-section" aria-labelledby="proof">
-        <p className="eyebrow">What it actually produces</p>
-        <h2 id="proof">A real hook, and a real refusal.</h2>
-        <p className="section-lede">
-          Two things from actual runs — the opening line of a generated script, and the guard
-          declining to publish. Both are more useful than another paragraph of claims.
-        </p>
-        <div className="proof-grid">
-          <figure className="proof-card">
-            <figcaption className="proof-label">Generated opening · topic: why edits take so long</figcaption>
-            <blockquote className="proof-quote">
-              &ldquo;You didn&rsquo;t spend six hours editing. You spent one hour editing and five
-              hours deciding.&rdquo;
-            </blockquote>
-            <p className="muted">
-              You rewrite this line before anything can publish. That is the point of it — a
-              strong angle to sharpen, not a finished sentence to accept.
-            </p>
-          </figure>
-          <figure className="proof-card blocked">
-            <figcaption className="proof-label">Guard verdict</figcaption>
-            <p className="proof-verdict">Publishing blocked</p>
-            <p className="proof-reason">
-              This script closely resembles a video already on the channel. Rewrite it around a
-              different angle, or add material that is genuinely new.
-            </p>
-            <p className="muted">
-              Blocked, not warned. There is no button here that lets you publish it anyway.
-            </p>
-          </figure>
-        </div>
-      </section>
-
-      <section className="landing-section" aria-labelledby="audience">
-        <p className="eyebrow">Who it is for</p>
-        <h2 id="audience">This is a narrow tool, on purpose.</h2>
-        <div className="split">
-          <div className="audience-col">
-            <h3 className="audience-head yes">A good fit if</h3>
-            <ul className="audience-list">
-              {AUDIENCE.yes.map((line) => <li key={line}>{line}</li>)}
-            </ul>
           </div>
-          <div className="audience-col">
-            <h3 className="audience-head no">Not for you if</h3>
-            <ul className="audience-list">
-              {AUDIENCE.no.map((line) => <li key={line}>{line}</li>)}
-            </ul>
-          </div>
-        </div>
-      </section>
+        </header>
 
-      <section className="landing-section" aria-labelledby="pricing">
-        <p className="eyebrow">Pricing</p>
-        <h2 id="pricing">Plans differ on volume, not on protection.</h2>
-        <p className="section-lede">
-          Every plan gets the same guard and the same 90-second maximum. Paying more buys more
-          videos and more channels — it does not buy a way around the checks.
-        </p>
-        <div className="plan-grid">
-          {PLANS.map((plan) => (
-            <div key={plan.name} className={`plan-card${plan.featured ? ' featured' : ''}`}>
-              {plan.featured ? <span className="plan-tag">Most chosen</span> : null}
-              <h3>{plan.name}</h3>
-              <p className="plan-price">{plan.price}<span className="plan-period">/mo</span></p>
-              <p className="plan-line">{plan.videos}</p>
-              <p className="plan-line muted">{plan.channels}</p>
+        <section className="lp-band white" aria-labelledby="stakes" id="stakes">
+          <div className="lp-inner">
+            <p className="lp-label">The stakes</p>
+            <h2 className="lp-display">Same volume.<br />Opposite outcome.</h2>
+            <p className="lp-lede">
+              Both columns publish thirty videos a month. Only one of them is still earning
+              at the end of it.
+            </p>
+            <div className="lp-versus">
+              <div className="lp-vcol stop">
+                <h3>Every other AI video tool</h3>
+                <ul>
+                  <li>Optimises for how many videos you can ship</li>
+                  <li>Reuses your own angles back at you without noticing</li>
+                  <li>Writes a personal story you never lived</li>
+                  <li>Publishes whatever it generated, unread</li>
+                  <li>Leaves disclosure for you to remember</li>
+                </ul>
+                <p className="lp-vend">Channel-level demonetisation. Every upload, at once.</p>
+              </div>
+              <div className="lp-vcol go">
+                <h3>ViralPilot</h3>
+                <ul>
+                  <li>Optimises for how many videos you can safely publish</li>
+                  <li>Scores every script against your catalogue and blocks duplicates</li>
+                  <li>Leaves the personal specifics blank, on purpose, for you</li>
+                  <li>Refuses to publish until you have rewritten the hook</li>
+                  <li>Handles altered-content disclosure automatically</li>
+                </ul>
+                <p className="lp-vend">A record of human authorship on every video you ship.</p>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        </section>
 
-      <section className="landing-section" aria-labelledby="faq">
-        <p className="eyebrow">Questions people actually ask</p>
-        <h2 id="faq">Straight answers.</h2>
-        <div className="faq-list">
-          {FAQ.map((item) => (
-            <details key={item.q} className="faq-item">
-              <summary>{item.q}</summary>
-              <p>{item.a}</p>
-            </details>
-          ))}
-        </div>
-      </section>
+        <section className="lp-band" aria-labelledby="how" id="how">
+          <div className="lp-inner">
+            <p className="lp-label">How it works</p>
+            <h2 className="lp-display">Four steps. You own two of them.</h2>
+            <div className="lp-steps">
+              {STEPS.map((step) => (
+                <article key={step.n} className="lp-step">
+                  <span className="lp-step-n" aria-hidden="true">{step.n}</span>
+                  <div>
+                    <h3>{step.title}</h3>
+                    <p>{step.body}</p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-      <section className="landing-cta">
-        <h2>Start with three videos, free.</h2>
-        <p>Connect a channel, write one script, and see what the guard says about it.</p>
-        <Link className="button-link" to="/register">Create your account</Link>
-      </section>
-    </main>
+        <section className="lp-band void" aria-labelledby="guard" id="guard">
+          <div className="lp-inner">
+            <p className="lp-label">The part that matters</p>
+            <h2 className="lp-display">The guard blocks.<br />It does not warn.</h2>
+            <p className="lp-lede">
+              A warning you can click past is not protection. Nothing publishes until all four
+              of these pass, and the thresholds are not yours to turn off.
+            </p>
+            <div className="lp-checks">
+              {CHECKS.map((check) => (
+                <article key={check.title} className="lp-check">
+                  <span className="lp-check-mark" aria-hidden="true">✓</span>
+                  <h3>{check.title}</h3>
+                  <p>{check.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-band" aria-labelledby="proof">
+          <div className="lp-inner">
+            <p className="lp-label">What it produces</p>
+            <h2 className="lp-display">A real hook, and a real refusal.</h2>
+            <p className="lp-lede">
+              Two things from actual runs. Both are more useful than another paragraph of
+              claims about quality.
+            </p>
+            <div className="lp-proof">
+              <figure className="lp-quote">
+                <blockquote>
+                  “You didn’t spend six hours editing. You spent one hour editing and five
+                  hours deciding.”
+                </blockquote>
+                <figcaption>
+                  Generated opening, topic: why edits take so long. You rewrite this line
+                  before anything can publish — that is the point of it. A strong angle to
+                  sharpen, not a finished sentence to accept.
+                </figcaption>
+              </figure>
+              <figure className="lp-quote">
+                <blockquote>
+                  “Add your own commentary before publishing. A video with no original
+                  insight is what YouTube demonetises as inauthentic.”
+                </blockquote>
+                <figcaption>
+                  An actual block. Not a warning banner, not a nudge — the publish path is
+                  closed until it is fixed, and there is no button in the product that
+                  overrides it.
+                </figcaption>
+              </figure>
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-band void" aria-labelledby="audience">
+          <div className="lp-inner">
+            <p className="lp-label">Who it is for</p>
+            <h2 className="lp-display">A narrow tool, on purpose.</h2>
+            <div className="lp-aud">
+              <div>
+                <h3 className="go">A good fit if</h3>
+                <ul>{AUDIENCE.yes.map((l) => <li key={l}>{l}</li>)}</ul>
+              </div>
+              <div>
+                <h3 className="stop">Not for you if</h3>
+                <ul>{AUDIENCE.no.map((l) => <li key={l}>{l}</li>)}</ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-band white" aria-labelledby="pricing" id="pricing">
+          <div className="lp-inner">
+            <p className="lp-label">Pricing</p>
+            <h2 className="lp-display">Plans differ on volume.<br />Never on protection.</h2>
+            <p className="lp-lede">
+              Every plan gets the same guard and the same 90-second maximum. Paying more buys
+              more videos and more channels. It does not buy a way around the checks.
+            </p>
+            <div className="lp-plans">
+              {PLANS.map((plan) => (
+                <div key={plan.name} className={`lp-plan${plan.pick ? ' pick' : ''}`}>
+                  {plan.pick ? <span className="lp-plan-tag">Most chosen</span> : null}
+                  <h3>{plan.name}</h3>
+                  <p className="lp-price">{plan.price}<small>/mo</small></p>
+                  <p>{plan.videos}</p>
+                  <p>{plan.channels}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-band" aria-labelledby="faq">
+          <div className="lp-inner">
+            <p className="lp-label">Questions people actually ask</p>
+            <h2 className="lp-display">Straight answers.</h2>
+            <div className="lp-faq">
+              {FAQ.map((item) => (
+                <details key={item.q} className="lp-q">
+                  <summary>{item.q}</summary>
+                  <p>{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="lp-close">
+          <div className="lp-inner">
+            <h2>Start with three videos.<br />See what the guard says.</h2>
+            <p>
+              Connect a channel, write one script, and find out whether it would have passed.
+              No card required.
+            </p>
+            <Link className="lp-cta" to="/register">Create your account</Link>
+          </div>
+        </section>
+      </main>
+
+      <footer className="lp-foot">
+        <div className="lp-foot-inner">
+          <p>ViralPilot — a Quantum Synergy Solutions product</p>
+          <p><Link to="/login">Sign in</Link></p>
+        </div>
+      </footer>
+    </div>
   )
 }

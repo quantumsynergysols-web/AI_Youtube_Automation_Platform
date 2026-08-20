@@ -1,4 +1,4 @@
-import { Link, Navigate, NavLink, Route, Routes } from 'react-router-dom'
+import { Link, Navigate, NavLink, Route, Routes, useLocation } from 'react-router-dom'
 import { useAuth } from './lib/auth'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -32,7 +32,14 @@ function Protected({ children }: { children: JSX.Element }) {
 }
 
 export default function App() {
-  const { me, signOut } = useAuth()
+  const { me, signOut, loading } = useAuth()
+  const location = useLocation()
+
+  // The marketing page runs full-bleed — alternating edge-to-edge dark and white
+  // bands are the thing that stops it reading like every other constrained-column
+  // template, and that cannot be done from inside .shell. It brings its own nav
+  // and footer.
+  if (!me && !loading && location.pathname === '/') return <Landing />
 
   return (
     <div className="shell">
