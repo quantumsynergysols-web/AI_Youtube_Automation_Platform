@@ -1,5 +1,7 @@
 interface Props {
   label: string
+  /** Sits under the input, so a rule stays attached to the field it governs. */
+  hint?: string
   type?: string
   value: string
   onChange: (v: string) => void
@@ -7,7 +9,7 @@ interface Props {
   required?: boolean
 }
 
-export function Field({ label, type = 'text', value, onChange, autoComplete, required }: Props) {
+export function Field({ label, hint, type = 'text', value, onChange, autoComplete, required }: Props) {
   return (
     <label>
       {label}
@@ -18,6 +20,7 @@ export function Field({ label, type = 'text', value, onChange, autoComplete, req
         required={required}
         onChange={(e) => onChange(e.target.value)}
       />
+      {hint ? <span className="field-hint">{hint}</span> : null}
     </label>
   )
 }

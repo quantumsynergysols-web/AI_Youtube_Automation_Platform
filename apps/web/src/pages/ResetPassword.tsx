@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
+import { AuthShell } from '../components/AuthShell'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
 
@@ -26,16 +27,23 @@ export default function ResetPassword() {
   }
 
   return (
-    <div className="card">
-      <h1>Choose a new password</h1>
+    <AuthShell title="Choose a new password">
       <Alert error={error} message={message} />
       {!message && (
         <form className="stack" onSubmit={submit}>
-          <Field label="New password" type="password" value={password} onChange={setPassword} autoComplete="new-password" required />
+          <Field
+            label="New password"
+            type="password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+            hint="At least 10 characters."
+            required
+          />
           <button type="submit">Update password</button>
         </form>
       )}
-      {message && <p><Link to="/login">Go to sign in</Link></p>}
-    </div>
+      {message && <p className="auth-foot"><Link to="/login">Go to sign in</Link></p>}
+    </AuthShell>
   )
 }

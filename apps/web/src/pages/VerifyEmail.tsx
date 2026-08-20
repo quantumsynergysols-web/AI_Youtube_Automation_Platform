@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { api } from '../lib/api'
+import { AuthShell } from '../components/AuthShell'
 import { Alert } from '../components/Alert'
 
 export default function VerifyEmail() {
@@ -17,11 +18,10 @@ export default function VerifyEmail() {
   }, [token])
 
   return (
-    <div className="card">
-      <h1>Confirm your email</h1>
-      {!token && <p>This link is missing its token. Use the link from your email exactly as sent.</p>}
+    <AuthShell title="Confirm your email">
+      {!token && <p className="auth-lede">This link is missing its token. Use the link from your email exactly as sent.</p>}
       <Alert error={error} message={ok ? 'Your email is confirmed. You can sign in now.' : null} />
-      {ok && <p><Link to="/login">Go to sign in</Link></p>}
-    </div>
+      {ok && <p className="auth-foot"><Link to="/login">Go to sign in</Link></p>}
+    </AuthShell>
   )
 }

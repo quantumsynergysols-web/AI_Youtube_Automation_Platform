@@ -271,3 +271,37 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
   .card { padding: 16px; }
   .shell .nav-links a { font-size: 14px; padding: 10px 8px; }
 }
+
+/* ---------- auth screens ----------
+   A single column of short fields. The measure is narrow because a full-width
+   input puts the label and the caret a screen apart, which reads as broken
+   before it is even used. */
+.auth { display: flex; justify-content: center; padding: 34px 0 72px; }
+.auth-inner { width: min(430px, 100%); display: flex; flex-direction: column; gap: 22px; }
+
+.auth-brand { display: inline-flex; align-items: center; gap: 9px; align-self: center; font-family: "Plus Jakarta Sans", Inter, sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -.03em; color: var(--ink); text-decoration: none; }
+.auth-brand svg { width: 21px; height: 21px; }
+
+.auth-card { background: var(--surface); border: 1px solid var(--rule); border-radius: 16px; padding: 32px 30px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 18px 44px -30px rgba(11, 26, 21, .34); }
+.auth-card h1 { font-size: 25px; margin: 0; letter-spacing: -0.03em; line-height: 1.16; }
+.auth-card .eyebrow { margin: 0 0 -4px; }
+.auth-lede { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin: 0; }
+.auth-card form { gap: 15px; }
+/* The primary action fills the card. There is only ever one thing to do here. */
+.auth-card form > button[type="submit"] { width: 100%; padding: 12px 18px; font-size: 15px; }
+.auth-card .row { justify-content: space-between; }
+.auth-card .row > button[type="submit"] { flex: 1 1 auto; }
+
+.auth-divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+.auth-divider::before, .auth-divider::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
+
+.auth-foot { text-align: center; font-size: 14px; color: var(--muted); margin: 0; }
+.auth-foot a { font-weight: 600; }
+
+.field-hint { font-size: 12.5px; color: var(--muted); font-weight: 400; margin-top: -2px; }
+
+@media (max-width: 480px) {
+  .auth { padding: 20px 0 48px; }
+  .auth-card { padding: 24px 20px; border-radius: 14px; }
+  .auth-card h1 { font-size: 22px; }
+}

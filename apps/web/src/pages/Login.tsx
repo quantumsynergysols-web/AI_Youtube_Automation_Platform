@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
+import { AuthDivider, AuthShell } from '../components/AuthShell'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
 import { GoogleButton } from '../components/GoogleButton'
@@ -28,21 +29,20 @@ export default function Login() {
   }
 
   return (
-    <div className="card">
-      <p className="eyebrow">ViralPilot</p>
-      <h1>Sign in</h1>
-      <p>Stay in control of every video while ViralPilot handles the production workflow.</p>
+    <AuthShell
+      title="Sign in"
+      lede="Stay in control of every video while ViralPilot handles the production workflow."
+      footer={<>No account yet? <Link to="/register">Create one</Link>.</>}
+    >
       <Alert error={error} />
       <form className="stack" onSubmit={submit}>
         <Field label="Email" type="email" value={email} onChange={setEmail} autoComplete="email" required />
         <Field label="Password" type="password" value={password} onChange={setPassword} autoComplete="current-password" required />
-        <div className="row">
-          <button type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
-          <Link to="/forgot-password" className="muted">Forgot password?</Link>
-        </div>
+        <button type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
+      <p className="auth-foot"><Link to="/forgot-password">Forgot your password?</Link></p>
+      <AuthDivider />
       <GoogleButton onError={setError} />
-      <p className="muted">No account yet? <Link to="/register">Create one</Link>.</p>
-    </div>
+    </AuthShell>
   )
 }

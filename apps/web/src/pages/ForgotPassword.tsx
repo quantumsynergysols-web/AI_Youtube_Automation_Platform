@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
+import { AuthShell } from '../components/AuthShell'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
 
@@ -23,8 +25,11 @@ export default function ForgotPassword() {
   }
 
   return (
-    <div className="card">
-      <h1>Reset your password</h1>
+    <AuthShell
+      title="Reset your password"
+      lede="We will email you a link to set a new one."
+      footer={<>Remembered it? <Link to="/login">Sign in</Link>.</>}
+    >
       <Alert error={error} message={message} />
       {!message && (
         <form className="stack" onSubmit={submit}>
@@ -32,6 +37,6 @@ export default function ForgotPassword() {
           <button type="submit">Send reset link</button>
         </form>
       )}
-    </div>
+    </AuthShell>
   )
 }

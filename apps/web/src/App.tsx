@@ -67,13 +67,13 @@ export default function App() {
               <NavLink to="/billing">Billing</NavLink>
             </>
           ) : (
-            // Marketing nav. A landing page with sections and no way to reach
-            // them makes a visitor scroll to find out whether it is worth
-            // scrolling.
+            // Real routes, not in-page anchors. These render on /login and
+            // /register too, where #how and #guard point at sections that only
+            // exist on the landing page — so they scrolled nowhere.
             <>
-              <a href="#how">How it works</a>
-              <a href="#guard">The guard</a>
-              <a href="#pricing">Pricing</a>
+              <NavLink to="/features">Features</NavLink>
+              <NavLink to="/pricing">Pricing</NavLink>
+              <NavLink to="/about">About</NavLink>
             </>
           )}
         </div>
