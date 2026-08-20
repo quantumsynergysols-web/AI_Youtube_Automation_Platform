@@ -47,27 +47,68 @@
 .lp-lede { font-size: 17px; line-height: 1.62; color: var(--lp-ink-2); max-width: 40rem; margin: 20px 0 0; }
 .lp-band.white .lp-lede { color: #3d5249; }
 
-/* ---------- nav ---------- */
-.lp-nav { position: sticky; top: 0; z-index: 30; background: rgba(8, 18, 15, 0.86); backdrop-filter: blur(12px); border-bottom: 1px solid var(--lp-line); }
-.lp-nav-inner { width: min(1120px, 100% - 44px); margin-inline: auto; display: flex; align-items: center; gap: 30px; height: 66px; }
-.lp-brand { font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 19px; letter-spacing: -0.03em; color: var(--lp-ink); text-decoration: none; }
-.lp-nav-links { display: flex; gap: 26px; margin-left: 14px; }
-.lp-nav-links a { color: var(--lp-ink-2); text-decoration: none; font-size: 14px; font-weight: 550; }
-.lp-nav-links a:hover { color: var(--lp-ink); }
-.lp-nav-end { margin-left: auto; display: flex; align-items: center; gap: 16px; }
-.lp-nav-end a { color: var(--lp-ink-2); text-decoration: none; font-size: 14px; font-weight: 600; }
-.lp-nav-end a:hover { color: var(--lp-ink); }
+/* ---------- nav: floating pill ----------
+   Sticky wrapper, detached from the edges, with the CTA sitting flush inside the
+   pill — which is why the padding is asymmetric. A bar welded to the top edge is
+   the default; a pill that floats over the content reads as designed. */
+.lp-navwrap { position: sticky; top: 16px; z-index: 40; padding: 16px; }
+.lp-nav {
+  width: min(1060px, 100%);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 5px 5px 17px;
+  border: 1px solid var(--lp-line-strong);
+  border-radius: 13px;
+  background: rgba(9, 20, 16, 0.82);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 18px 40px -24px rgba(0, 0, 0, 0.9);
+}
+.lp-brand { display: inline-flex; align-items: center; gap: 9px; font-family: "Bricolage Grotesque", sans-serif; font-weight: 800; font-size: 16.5px; letter-spacing: -0.03em; color: var(--lp-ink); text-decoration: none; }
+.lp-brand svg { width: 19px; height: 19px; flex-shrink: 0; }
 
-.lp-cta { display: inline-flex; align-items: center; justify-content: center; background: var(--lp-green); color: #05120c; border: 0; border-radius: 999px; padding: 11px 22px; font-family: Archivo, sans-serif; font-size: 15px; font-weight: 700; text-decoration: none; white-space: nowrap; }
-.lp-cta:hover { background: #5cffb6; }
-.lp-cta.sm { padding: 8px 17px; font-size: 14px; }
-.lp-cta.ghost { background: transparent; color: var(--lp-ink); border: 1px solid var(--lp-line-strong); }
-.lp-cta.ghost:hover { background: rgba(255,255,255,.07); }
-.lp-band.white .lp-cta { background: #06110d; color: var(--lp-ink); }
-.lp-band.white .lp-cta:hover { background: #123024; }
+.lp-nav-links { display: flex; align-items: center; gap: 2px; margin-left: 18px; }
+.lp-nav-links > a, .lp-menu-trigger {
+  display: inline-flex; align-items: center; gap: 5px;
+  color: var(--lp-ink-2); text-decoration: none;
+  font-family: Archivo, sans-serif; font-size: 14px; font-weight: 550;
+  padding: 8px 11px; border-radius: 8px; background: none; border: 0; cursor: pointer;
+}
+.lp-nav-links > a:hover, .lp-menu-trigger:hover { color: var(--lp-ink); background: rgba(255,255,255,.06); }
+
+/* Dropdown. Opens on hover and on keyboard focus, so it does not need JS and
+   does not trap anyone who is tabbing. */
+.lp-menu { position: relative; }
+.lp-menu-trigger::after { content: ""; width: 5px; height: 5px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: rotate(45deg) translateY(-1px); margin-left: 2px; }
+.lp-menu-panel {
+  position: absolute; top: calc(100% + 10px); left: 0;
+  width: 22rem; padding: 8px;
+  background: #0b1a15; border: 1px solid var(--lp-line-strong); border-radius: 13px;
+  box-shadow: 0 26px 54px -20px rgba(0,0,0,.92);
+  display: flex; flex-direction: column; gap: 2px;
+  opacity: 0; visibility: hidden; transform: translateY(-5px);
+  transition: opacity .14s ease, transform .14s ease, visibility .14s;
+}
+.lp-menu:hover .lp-menu-panel,
+.lp-menu:focus-within .lp-menu-panel { opacity: 1; visibility: visible; transform: translateY(0); }
+.lp-menu-item { display: block; padding: 10px 12px; border-radius: 9px; text-decoration: none; }
+.lp-menu-item:hover { background: rgba(52,245,160,.09); }
+.lp-menu-item b { display: block; color: var(--lp-ink); font-size: 14px; font-weight: 650; margin-bottom: 2px; }
+.lp-menu-item span { display: block; color: var(--lp-ink-2); font-size: 12.5px; line-height: 1.45; }
+
+.lp-nav-end { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+.lp-nav-end > a:not(.lp-cta) { color: var(--lp-ink-2); text-decoration: none; font-size: 14px; font-weight: 600; padding: 8px 12px; border-radius: 8px; }
+.lp-nav-end > a:not(.lp-cta):hover { color: var(--lp-ink); background: rgba(255,255,255,.06); }
+
+@media (max-width: 860px) {
+  .lp-navwrap { padding: 12px; top: 12px; }
+  .lp-nav { padding: 5px 5px 5px 14px; }
+  .lp-nav-links { display: none; }
+}
 
 /* ---------- hero ---------- */
-.lp-hero { position: relative; padding: 92px 0 78px; overflow: hidden; }
+.lp-hero { position: relative; padding: 66px 0 78px; overflow: hidden; }
 .lp-hero::before {
   content: ""; position: absolute; inset: -30% -10% auto 30%; height: 46rem;
   background: radial-gradient(ellipse at center, rgba(52, 245, 160, 0.16) 0%, transparent 60%);

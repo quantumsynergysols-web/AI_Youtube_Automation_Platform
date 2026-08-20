@@ -49,18 +49,22 @@ const STEPS = [
 const CHECKS = [
   {
     title: 'Duplication of your own work',
+    menuNote: 'Scored against your back catalogue before it can publish.',
     body: 'Every script is scored against your channel’s back catalogue. Too close to something you already made and it will not publish. The angle has to be new, not just the wording.',
   },
   {
     title: 'Evidence a human was involved',
+    menuNote: 'Hook rewritten and your own commentary, or it stays blocked.',
     body: 'The generated hook must be rewritten and your own commentary must be there. Saving the draft untouched does not count, because a click is not authorship.',
   },
   {
     title: 'Publishing cadence',
+    menuNote: 'Flags upload patterns that get channels looked at.',
     body: 'Uploading far faster than your channel normally does is flagged before it becomes the pattern that gets a channel looked at.',
   },
   {
     title: 'Altered-content disclosure',
+    menuNote: 'Applied for you when publishing, not left as a checkbox.',
     body: 'Synthetic voice and generated visuals are disclosed the way YouTube requires. Handled for you, not left as a checkbox you can forget.',
   },
 ]
@@ -112,21 +116,45 @@ const FAQ = [
 export default function Landing() {
   return (
     <div className="lp">
-      <nav className="lp-nav" aria-label="Main navigation">
-        <div className="lp-nav-inner">
-          <Link to="/" className="lp-brand">ViralPilot</Link>
+      <div className="lp-navwrap">
+        <nav className="lp-nav" aria-label="Main navigation">
+          <Link to="/" className="lp-brand">
+            <svg viewBox="0 0 32 32" aria-hidden="true">
+              <rect width="32" height="32" rx="8" fill="#34f5a0" />
+              <path d="M8 9l8 15 8-15h-5l-3 7-3-7z" fill="#05120c" />
+            </svg>
+            ViralPilot
+          </Link>
+
           <div className="lp-nav-links">
             <a href="#stakes">Why it matters</a>
             <a href="#how">How it works</a>
-            <a href="#guard">The guard</a>
+
+            {/* Hover- and focus-driven, so it needs no JS and does not trap a
+                keyboard user inside it. */}
+            <div className="lp-menu">
+              <button type="button" className="lp-menu-trigger" aria-haspopup="true">
+                The guard
+              </button>
+              <div className="lp-menu-panel" role="menu">
+                {CHECKS.map((check) => (
+                  <a key={check.title} className="lp-menu-item" href="#guard" role="menuitem">
+                    <b>{check.title}</b>
+                    <span>{check.menuNote}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+
             <a href="#pricing">Pricing</a>
           </div>
+
           <div className="lp-nav-end">
             <Link to="/login">Sign in</Link>
             <Link className="lp-cta sm" to="/register">Start free</Link>
           </div>
-        </div>
-      </nav>
+        </nav>
+      </div>
 
       <main id="main-content">
         <header className="lp-hero">
