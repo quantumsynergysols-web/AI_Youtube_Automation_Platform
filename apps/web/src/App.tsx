@@ -7,6 +7,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import ResetPassword from './pages/ResetPassword'
 import Landing from './pages/Landing'
 import Dashboard from './pages/Dashboard'
+import Projects from './pages/Projects'
 import Billing from './pages/Billing'
 import Channels from './pages/Channels'
 import ScriptReview from './pages/ScriptReview'
@@ -80,6 +81,7 @@ export default function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/billing" element={<Protected><Billing /></Protected>} />
         <Route path="/channels" element={<Protected><Channels /></Protected>} />
+        <Route path="/projects" element={<Protected><Projects /></Protected>} />
         <Route path="/projects/:id/script" element={<Protected><ScriptReview /></Protected>} />
         <Route path="/" element={<Home />} />
       </Routes>

@@ -64,7 +64,8 @@ button:disabled { opacity: .55; cursor: not-allowed; }
 a:focus-visible, button:focus-visible, input:focus-visible { outline: 3px solid #f1a938; outline-offset: 3px; }
 
 label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; font-weight: 650; }
-input, textarea { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; font: inherit; background: var(--surface); color: var(--ink); }
+input, textarea, select { padding: 10px 12px; border: 1px solid var(--rule); border-radius: 6px; font: inherit; background: var(--surface); color: var(--ink); }
+select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: right 14px center, right 9px center; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; padding-right: 32px; cursor: pointer; }
 textarea { width: 100%; resize: vertical; line-height: 1.55; }
 .alert, .notice { padding: 12px 14px; border-radius: 7px; font-size: 14px; line-height: 1.5; }
 .alert.error, .notice.error { background: var(--stop-soft); color: #78251f; border: 1px solid #efc5c1; }
@@ -248,3 +249,17 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 .faq-item[open] summary::after { content: "\2212"; }
 .faq-item summary:hover { color: var(--accent-dark); }
 .faq-item p { padding: 0 0 18px; max-width: 52rem; }
+
+/* ---- projects ---- */
+.field { flex: 1 1 14rem; min-width: 0; }
+.field-label { font-size: 14px; font-weight: 650; color: var(--ink); }
+.field .muted { font-weight: 400; }
+.form-row { align-items: flex-start; gap: 16px; }
+.project-actions { flex-shrink: 0; gap: 8px; }
+.load-more { justify-content: center; padding-top: 14px; }
+
+@media (max-width: 760px) {
+  .form-row { flex-direction: column; }
+  .form-row .field { width: 100%; }
+  .project-actions { width: 100%; }
+}
