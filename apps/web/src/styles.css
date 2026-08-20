@@ -49,12 +49,12 @@ p { color: var(--ink-2); margin: 0; line-height: 1.55; }
 
 .skip-link { position: fixed; left: 16px; top: -50px; z-index: 20; background: var(--ink); color: white; padding: 10px 14px; border-radius: 5px; }
 .skip-link:focus { top: 12px; }
-nav { display: flex; align-items: center; gap: 24px; min-height: 54px; padding-bottom: 18px; border-bottom: 1px solid var(--rule); margin-bottom: 38px; }
-.nav-links { display: flex; gap: 7px; }
-nav a { color: var(--ink-2); text-decoration: none; font-weight: 550; font-size: 15px; padding: 9px 12px; border-radius: 9px; }
-nav a.brand { padding-left: 0; color: var(--ink); font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
-nav a.brand:hover { color: var(--accent-dark); background: transparent; }
-nav a:hover, nav a.active { color: var(--accent-dark); background: var(--accent-soft); }
+.shell > nav { display: flex; align-items: center; gap: 24px; min-height: 54px; padding-bottom: 18px; border-bottom: 1px solid var(--rule); margin-bottom: 38px; }
+.shell .nav-links { display: flex; gap: 7px; }
+.shell > nav a { color: var(--ink-2); text-decoration: none; font-weight: 550; font-size: 15px; padding: 9px 12px; border-radius: 9px; }
+.shell > nav a.brand { padding-left: 0; color: var(--ink); font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.shell > nav a.brand:hover { color: var(--accent-dark); background: transparent; }
+.shell > nav a:hover, .shell > nav a.active { color: var(--accent-dark); background: var(--accent-soft); }
 .account-nav { margin-left: auto; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; }
 .link-button { padding: 0; color: var(--accent-dark); background: none; border: 0; font-size: 14px; }
 
@@ -164,7 +164,7 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 @media (prefers-reduced-motion: reduce) { .progress-orbit { animation: none; border-color: var(--accent); }.generation-track span { transition: none; } }
 
 @media (max-width: 700px) {
-  .shell { padding: 18px 16px 56px; } nav { align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; }.nav-links { order: 3; width: 100%; gap: 0; overflow-x: auto; }.account-nav { font-size: 0; }.account-nav .link-button { font-size: 14px; }
+  .shell { padding: 18px 16px 56px; } .shell > nav { align-items: flex-start; margin-bottom: 28px; flex-wrap: wrap; }.nav-links { order: 3; width: 100%; gap: 0; overflow-x: auto; }.account-nav { font-size: 0; }.account-nav .link-button { font-size: 14px; }
   .page-header { align-items: flex-start; flex-direction: column; }.page-header > button { width: 100%; }.card { padding: 20px; }.channel-grid { grid-template-columns: 1fr; }.page-state { grid-template-columns: 1fr; padding: 22px; }
   .editor-footer, .section-heading, .project-brief, .scene-save { align-items: flex-start; flex-direction: column; }.brief-facts { justify-content: flex-start; }.editor-footer button, .guard-action, .scene-save button { width: 100%; }.scene-review { grid-template-columns: 1fr; }.generation-progress { grid-template-columns: 1fr; padding: 8px; }
 }
@@ -234,7 +234,7 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
   }
   /* min-height rather than padding: the narrow-screen block below tightens
      padding on these, and padding alone would be silently overridden there. */
-  nav a {
+  .shell > nav a {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
@@ -245,14 +245,14 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 @media (max-width: 700px) {
   /* Wrap rather than scroll. A nav you have to drag sideways hides whatever is
      last in it — here that was Billing, invisible until you found the scroll. */
-  .nav-links {
+  .shell .nav-links {
     order: 3;
     width: 100%;
     gap: 4px;
     flex-wrap: wrap;
     overflow-x: visible;
   }
-  .nav-links a { flex: 1 1 auto; text-align: center; }
+  .shell .nav-links a { flex: 1 1 auto; text-align: center; }
 
   /* 16px is the threshold below which iOS Safari zooms the viewport on focus,
      which leaves the page zoomed after the field is dismissed. */
@@ -269,5 +269,5 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 @media (max-width: 380px) {
   .shell { padding: 16px 12px 48px; }
   .card { padding: 16px; }
-  .nav-links a { font-size: 14px; padding: 10px 8px; }
+  .shell .nav-links a { font-size: 14px; padding: 10px 8px; }
 }
