@@ -84,12 +84,11 @@ export function GoogleButton({ onError }: { onError: (err: unknown) => void }) {
   }
 
   return (
-    <div className="stack" style={{ gap: 10 }}>
-      <div className="row" style={{ gap: 10 }}>
-        <span style={{ flex: 1, height: 1, background: 'var(--rule)' }} />
-        <span className="muted" style={{ fontSize: 13 }}>or</span>
-        <span style={{ flex: 1, height: 1, background: 'var(--rule)' }} />
-      </div>
+    <div className="stack" style={{ gap: 14 }}>
+      {/* The separator lives here, with the button it separates. Rendered by the
+          page instead, it survives when this component returns null and leaves
+          an "or" pointing at nothing. */}
+      <div className="auth-divider" role="separator"><span>or</span></div>
       <div ref={host} />
     </div>
   )

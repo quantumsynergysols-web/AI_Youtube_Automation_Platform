@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { MarketingFooter, MarketingNav } from './Marketing'
 
 /**
  * Shared layout for the five auth screens.
@@ -9,6 +10,12 @@ import { Link } from 'react-router-dom'
  * looks broken and is genuinely harder to use, because the label and the cursor
  * end up a screen apart. Auth forms are a single column of short fields and
  * want a narrow measure.
+ *
+ * They also carry the marketing header and footer rather than the app's. These
+ * are public pages: someone arriving from the landing page should not find the
+ * navigation changing shape underneath them at the moment they are deciding
+ * whether to sign up. The footer additionally puts the privacy policy and terms
+ * one click from the account form, which is where they belong.
  */
 export function AuthShell({
   eyebrow,
@@ -24,9 +31,11 @@ export function AuthShell({
   footer?: ReactNode
 }) {
   return (
-    <main className="auth" id="main-content">
-      <div className="auth-inner">
-        <Link to="/" className="auth-brand" aria-label="ViralPilot home">
+    <div className="lp">
+      <MarketingNav />
+      <main className="auth" id="main-content">
+        <div className="auth-inner">
+          <Link to="/" className="auth-brand" aria-label="ViralPilot home">
           <svg viewBox="0 0 32 32" aria-hidden="true">
             <rect width="32" height="32" rx="8" fill="#087349" />
             <path d="M8 9l8 15 8-15h-5l-3 7-3-7z" fill="#ffffff" />
@@ -41,13 +50,10 @@ export function AuthShell({
           {children}
         </div>
 
-        {footer ? <p className="auth-foot">{footer}</p> : null}
-      </div>
-    </main>
+          {footer ? <p className="auth-foot">{footer}</p> : null}
+        </div>
+      </main>
+      <MarketingFooter />
+    </div>
   )
-}
-
-/** Separates the password form from the Google button without saying "OR" twice. */
-export function AuthDivider({ label = 'or' }: { label?: string }) {
-  return <div className="auth-divider" role="separator"><span>{label}</span></div>
 }

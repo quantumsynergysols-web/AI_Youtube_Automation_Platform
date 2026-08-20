@@ -52,6 +52,13 @@ export default function App() {
   if (location.pathname === '/about') return <About />
   if (location.pathname === '/privacy') return <Privacy />
   if (location.pathname === '/terms') return <Terms />
+  // Auth screens are public too, and carry the same header and footer as the
+  // rest of the public site rather than the app chrome.
+  if (location.pathname === '/login') return <Login />
+  if (location.pathname === '/register') return <Register />
+  if (location.pathname === '/forgot-password') return <ForgotPassword />
+  if (location.pathname === '/reset-password') return <ResetPassword />
+  if (location.pathname === '/verify-email') return <VerifyEmail />
 
   return (
     <div className="shell">

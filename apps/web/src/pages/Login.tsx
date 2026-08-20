@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Link, Navigate } from 'react-router-dom'
 import { useAuth } from '../lib/auth'
-import { AuthDivider, AuthShell } from '../components/AuthShell'
+import { AuthShell } from '../components/AuthShell'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
 import { GoogleButton } from '../components/GoogleButton'
@@ -41,7 +41,6 @@ export default function Login() {
         <button type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
       </form>
       <p className="auth-foot"><Link to="/forgot-password">Forgot your password?</Link></p>
-      <AuthDivider />
       <GoogleButton onError={setError} />
     </AuthShell>
   )

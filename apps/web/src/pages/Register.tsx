@@ -1,7 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { api } from '../lib/api'
-import { AuthDivider, AuthShell } from '../components/AuthShell'
+import { AuthShell } from '../components/AuthShell'
 import { Field } from '../components/Field'
 import { Alert } from '../components/Alert'
 import { GoogleButton } from '../components/GoogleButton'
@@ -52,10 +52,18 @@ export default function Register() {
             />
             <button type="submit" disabled={busy}>{busy ? 'Creating…' : 'Create account'}</button>
           </form>
-          <AuthDivider />
-          <GoogleButton onError={setError} />
+              <GoogleButton onError={setError} />
           <p className="field-hint">
             Three videos free, no card. Your channel stays read-only until you choose to publish.
+          </p>
+          {/* Stated rather than a checkbox. The pages are one click away and the
+              consent is recorded by the act of creating the account, which is
+              standard practice and one less thing between a creator and trying
+              the product. */}
+          <p className="auth-consent">
+            By creating an account you agree to the{' '}
+            <Link to="/terms">Terms of Service</Link> and{' '}
+            <Link to="/privacy">Privacy Policy</Link>.
           </p>
         </>
       )}
