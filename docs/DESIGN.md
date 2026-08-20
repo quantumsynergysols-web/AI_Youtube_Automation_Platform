@@ -61,7 +61,18 @@ implies a state.
 
 ## 3. Typography
 
-- The system stack in `:root`. Do not add a webfont.
+**Archivo**, loaded in `index.html`, with a system fallback. One variable family
+covers display and body, so the whole identity costs a single request.
+
+> Reversing an earlier rule in this document. The first version said "do not add a
+> webfont", which was a decision made for simplicity and was wrong. A system stack is
+> the single most reliable way to make a product look unfinished — it is what a page
+> looks like *before* anyone has designed it. Archivo has real authority at 800 and is
+> not one of the three faces every generated site reaches for.
+
+- Display sizes are heavy and tight: weight 800, letter-spacing around -0.04em. At
+  40px and above, default tracking reads as loose and amateurish.
+- Body stays 400/500. Do not set body copy in the display weight.
 - `h1` per page, once. `h2` for sections. `h3` for cards. Do not skip levels to get a
   size — that breaks screen readers to save a CSS line.
 - `.eyebrow` above a heading for the category label. Uppercase, letter-spaced, accent
@@ -73,6 +84,20 @@ implies a state.
   counts, durations, token figures.
 
 ---
+
+## 3b. Light app, dark marketing
+
+The signed-in product is light — it is a working tool, used for long stretches, and
+a dark editor is a preference rather than a default. Marketing surfaces open dark:
+the hero and the closing band. That contrast is the point, and it is why the
+`--night-*` tokens exist rather than raw hex.
+
+Dark sections get **one** soft light source — a single radial glow, off-canvas,
+top-right. It gives a flat rectangle the read of a lit surface for the cost of a
+gradient. Do not add a second one; two light sources look like a mistake.
+
+`--night-accent` (`#2ee6c5`) only appears on dark. On light, the accent is
+`--accent`. The same colour at the same value cannot serve both grounds.
 
 ## 4. Layout
 
@@ -132,7 +157,7 @@ or lost in these sentences.
 These read as machine-generated and will be sent back:
 
 - Purple-to-blue gradient heroes.
-- Inter, Roboto, or Space Grotesk pulled in as a "safe" font.
+- Inter, Roboto, or Space Grotesk pulled in as a "safe" font. We use Archivo.
 - Emoji as section markers or status icons.
 - Everything centred. Left-aligned text is easier to read; centre only short hero copy.
 - Rounded-everything with a uniform drop shadow on every card.
@@ -167,6 +192,28 @@ Read these before writing a new screen:
 - `src/pages/script-review.logic.ts` — how rule-bearing logic is extracted and tested.
 - `src/pages/Channels.tsx` — list, empty state, connect flow.
 - `src/components/PageState.tsx` — the shared loading/empty/error component.
+
+---
+
+## 9b. Devices that earn their place
+
+Three, all currently on `Landing.tsx`. Reuse them; do not invent a fourth without
+reason.
+
+**The product visual.** The hero shows the real verdict panel — Blocked, 71%
+similarity, the actual refusal copy — built from the same vocabulary as the app,
+not a screenshot and not an illustration. A tool that shows itself saying no is
+making a claim it cannot fake. When you build a new feature, ask what artifact it
+produces and render that.
+
+**The comparison.** Two columns, same input, opposite outcome. It carries the
+argument faster than the paragraph that used to sit above it — which is why that
+paragraph was deleted rather than kept alongside. Two sections making one point is
+weaker than one section making it.
+
+**The verdict chip.** Small, uppercase, pill, semantic colour. Same shape everywhere
+a state appears — hero, guard panel, project list — so state always looks like
+state.
 
 ---
 

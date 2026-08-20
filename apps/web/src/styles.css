@@ -15,7 +15,13 @@
   --stop-soft: #fae7e5;
   --info: #285c83;
   --info-soft: #e4f0f8;
-  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --night: #0c1b1f;
+  --night-2: #12262b;
+  --night-rule: rgba(255, 255, 255, 0.12);
+  --night-ink: #f2f8f8;
+  --night-ink-2: #a9c2c4;
+  --night-accent: #2ee6c5;
+  font-family: Archivo, "Segoe UI", system-ui, -apple-system, sans-serif;
   color: var(--ink);
   background: var(--ground);
   font-synthesis: none;
@@ -29,8 +35,8 @@ a { color: var(--accent-dark); }
 .stack { display: flex; flex-direction: column; gap: 14px; }
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 
-h1 { font-size: clamp(28px, 4vw, 38px); margin: 2px 0 7px; letter-spacing: -0.035em; line-height: 1.1; }
-h2 { font-size: 19px; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(28px, 4vw, 38px); margin: 2px 0 7px; letter-spacing: -0.04em; line-height: 1.08; font-weight: 800; }
+h2 { font-size: 19px; margin: 0; letter-spacing: -0.02em; font-weight: 750; }
 h3 { font-size: 17px; margin: 0 0 4px; }
 p { color: var(--ink-2); margin: 0; line-height: 1.55; }
 .muted { color: var(--muted); font-size: 14px; }
@@ -168,14 +174,70 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 
 /* ---- landing ---- */
 .landing { display: flex; flex-direction: column; gap: 76px; padding-bottom: 40px; }
-.hero { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; max-width: 42rem; padding-top: 26px; }
-.hero h1 { font-size: clamp(34px, 5.4vw, 52px); line-height: 1.06; margin: 0; }
-.hero-lede { font-size: 18px; line-height: 1.6; }
-.hero-actions { margin-top: 6px; }
-.hero-note { margin: 0; }
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: 44px;
+  align-items: center;
+  background: linear-gradient(150deg, var(--night) 0%, var(--night-2) 62%, #0a2b2a 100%);
+  border-radius: 18px;
+  padding: 58px 52px 62px;
+  overflow: hidden;
+  margin-top: 6px;
+}
+/* One soft light source, top-right, so the panel reads as a surface rather than
+   a flat rectangle. Cheap depth with no image to load. */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -46%; right: -12%;
+  width: 34rem; height: 34rem;
+  background: radial-gradient(circle, rgba(46, 230, 197, 0.18) 0%, transparent 62%);
+  pointer-events: none;
+}
+.hero-copy { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 18px; align-items: flex-start; }
+.hero h1 { font-size: clamp(40px, 5.6vw, 66px); line-height: 1.02; letter-spacing: -0.045em; font-weight: 800; margin: 0; color: var(--night-ink); }
+.hero-em { color: var(--night-accent); }
+.hero-lede { font-size: 17px; line-height: 1.62; color: var(--night-ink-2); max-width: 34rem; }
+.hero-actions { margin-top: 4px; gap: 10px; }
+.hero-note { margin: 0; font-size: 13px; color: var(--night-ink-2); opacity: .8; }
+.ghost-link { background: transparent; color: var(--night-ink); border-color: var(--night-rule); }
+.ghost-link:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.28); }
+
+.pill { display: inline-flex; align-items: center; padding: 6px 13px; border-radius: 999px; border: 1px solid var(--night-rule); background: rgba(255,255,255,.06); color: var(--night-accent); font-size: 12px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+
+/* The hero product visual: a real verdict panel, not a stock illustration. */
+.hero-visual { position: relative; z-index: 1; }
+.verdict-panel { background: rgba(255,255,255,.05); border: 1px solid var(--night-rule); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px; backdrop-filter: blur(2px); }
+.verdict-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.verdict-label { font-size: 12px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; color: var(--night-ink-2); }
+.verdict-chip { font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 5px 11px; border-radius: 999px; }
+.verdict-chip.blocked { background: rgba(255, 106, 92, .16); color: #ff8d80; border: 1px solid rgba(255,106,92,.35); }
+.verdict-reason { color: var(--night-ink); font-size: 15px; line-height: 1.55; }
+.verdict-stats { margin: 4px 0 0; display: flex; flex-direction: column; gap: 9px; }
+.verdict-stats > div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; border-top: 1px solid var(--night-rule); padding-top: 9px; }
+.verdict-stats dt { color: var(--night-ink-2); font-size: 14px; }
+.verdict-stats dd { margin: 0; font-size: 15px; font-weight: 750; font-variant-numeric: tabular-nums; }
+.verdict-stats dd.bad { color: #ff8d80; }
+.verdict-stats dd.good { color: var(--night-accent); }
+.verdict-foot { color: var(--night-ink-2); font-size: 13px; margin-top: 2px; }
+
+/* Before / after. The comparison is the argument, so it gets real weight. */
+.versus { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 18px; margin-top: 10px; }
+.versus-col { border-radius: 12px; padding: 26px; display: flex; flex-direction: column; gap: 13px; border: 1px solid var(--rule); background: var(--surface); }
+.versus-col.bad { background: #fdf6f5; border-color: #f0cdc9; }
+.versus-col.good { background: #f1faf8; border-color: #b9e3dc; }
+.versus-tag { font-size: 12px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.versus-col.bad .versus-tag { color: #a3322b; }
+.versus-col.good .versus-tag { color: var(--accent-dark); }
+.versus-col ul { margin: 0; padding-left: 19px; display: flex; flex-direction: column; gap: 8px; color: var(--ink-2); line-height: 1.5; font-size: 15px; }
+.versus-end { margin-top: 5px; padding-top: 13px; border-top: 1px solid var(--rule); font-weight: 750; font-size: 15px; }
+.versus-col.bad .versus-end { color: #8d3a33; border-color: #f0cdc9; }
+.versus-col.good .versus-end { color: var(--accent-dark); border-color: #b9e3dc; }
 
 .landing-section { display: flex; flex-direction: column; gap: 14px; }
-.landing-section h2 { font-size: clamp(23px, 3vw, 29px); letter-spacing: -0.025em; line-height: 1.2; }
+.landing-section h2 { font-size: clamp(26px, 3.4vw, 36px); letter-spacing: -0.04em; line-height: 1.14; font-weight: 800; }
 .section-lede { max-width: 46rem; font-size: 16px; }
 
 .split { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 34px; align-items: start; }
@@ -203,7 +265,7 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 .plan-line { font-size: 14px; margin: 0; }
 
 .landing-cta { background: var(--accent-soft); border-radius: 12px; padding: 40px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-.landing-cta h2 { font-size: clamp(22px, 3vw, 28px); }
+.landing-cta h2 { font-size: clamp(25px, 3.4vw, 34px); letter-spacing: -0.04em; }
 
 /* ---- dashboard project list ---- */
 .project-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
@@ -217,6 +279,7 @@ code { font-family: "Cascadia Mono", ui-monospace, Consolas, monospace; font-siz
 
 @media (max-width: 760px) {
   .landing { gap: 52px; }
+  .hero { grid-template-columns: 1fr; padding: 34px 22px 38px; gap: 30px; }
   .split { grid-template-columns: 1fr; gap: 22px; }
   .guard-section { padding: 24px 20px; }
   .landing-cta { padding: 28px 20px; }

@@ -100,44 +100,80 @@ export default function Landing() {
   return (
     <main className="landing" id="main-content">
       <section className="hero">
-        <p className="eyebrow">For creators who already earn from their channel</p>
-        <h1>Make more videos without becoming the thing YouTube demonetises.</h1>
-        <p className="hero-lede">
-          YouTube&rsquo;s Inauthentic Content policy penalises mass-produced video at channel
-          level. ViralPilot is built the other way round: it refuses to publish work that
-          could put your channel in that category, and it will not let you skip the part
-          where you make the video yours.
-        </p>
-        <div className="row hero-actions">
-          <Link className="button-link" to="/register">Start free — 3 videos</Link>
-          <Link className="button-link secondary-link" to="/login">Sign in</Link>
+        <div className="hero-copy">
+          <span className="pill">For channels that are already monetised</span>
+          <h1>
+            Publish more.<br />
+            <span className="hero-em">Risk nothing.</span>
+          </h1>
+          <p className="hero-lede">
+            YouTube demonetises mass-produced video at channel level — every upload you
+            have ever made, at once. ViralPilot is the only one of these tools built to
+            refuse that work rather than mass-produce it.
+          </p>
+          <div className="row hero-actions">
+            <Link className="button-link" to="/register">Start free — 3 videos</Link>
+            <a className="button-link ghost-link" href="#guard">See how the guard works</a>
+          </div>
+          <p className="hero-note">No card required · Your channel stays read-only until you publish</p>
         </div>
-        <p className="muted hero-note">No card required. Your channel stays read-only until you choose to publish.</p>
+
+        {/*
+          The product, not a stock illustration. This is the verdict panel a
+          creator actually sees, rendered from the same vocabulary the app uses —
+          a tool that shows itself refusing to publish is making a claim it
+          cannot fake, which is a stronger opening than any adjective.
+        */}
+        <aside className="hero-visual" aria-label="Example of a blocked originality check">
+          <div className="verdict-panel">
+            <div className="verdict-head">
+              <span className="verdict-label">Originality Guard</span>
+              <span className="verdict-chip blocked">Blocked</span>
+            </div>
+            <p className="verdict-reason">
+              This script closely resembles a video already on the channel. Rewrite it around
+              a different angle, or add material that is genuinely new.
+            </p>
+            <dl className="verdict-stats">
+              <div><dt>Catalogue similarity</dt><dd className="bad">71%</dd></div>
+              <div><dt>Hook rewritten</dt><dd className="bad">No</dd></div>
+              <div><dt>Your commentary</dt><dd className="good">42 words</dd></div>
+            </dl>
+            <p className="verdict-foot">Publishing stays locked until this passes.</p>
+          </div>
+        </aside>
       </section>
 
-      <section className="landing-section" aria-labelledby="problem">
-        <div className="split">
-          <div className="stack">
-            <p className="eyebrow">The problem with every other tool</p>
-            <h2 id="problem">Output volume is the risk, not the product.</h2>
-            <p>
-              Tools that promise fifty videos a month are selling the exact signal that gets a
-              channel reviewed. The ones that fail do not fail slowly — monetisation is removed
-              at channel level, across everything you have ever uploaded.
-            </p>
-            <p>
-              An established channel has too much to lose to hand the keys to an autopilot. So
-              ViralPilot keeps you in the seat: it does the work that is genuinely mechanical,
-              and stops at the parts that have to be yours.
-            </p>
+      <section className="landing-section" aria-labelledby="stakes">
+        <p className="eyebrow">The stakes</p>
+        <h2 id="stakes">Same volume. Opposite outcome.</h2>
+        <p className="section-lede">
+          Both columns publish thirty videos a month. Only one of them is still monetised
+          at the end of it.
+        </p>
+        <div className="versus">
+          <div className="versus-col bad">
+            <span className="versus-tag">Every other AI video tool</span>
+            <ul>
+              <li>Optimises for how many videos you can ship</li>
+              <li>Reuses your own angles back at you without noticing</li>
+              <li>Writes a personal story you never lived</li>
+              <li>Publishes whatever it generated, unread</li>
+              <li>Leaves disclosure to you to remember</li>
+            </ul>
+            <p className="versus-end">Channel-level demonetisation. Every upload, at once.</p>
           </div>
-          <aside className="callout-card">
-            <p className="eyebrow">The difference in one line</p>
-            <p className="callout-line">
-              Every other tool asks how many videos you want. This one asks what you have
-              already said, and refuses to let you say it twice.
-            </p>
-          </aside>
+          <div className="versus-col good">
+            <span className="versus-tag">ViralPilot</span>
+            <ul>
+              <li>Optimises for how many videos you can safely publish</li>
+              <li>Scores every script against your back catalogue and blocks duplicates</li>
+              <li>Leaves the personal specifics blank, on purpose, for you</li>
+              <li>Refuses to publish until you have rewritten the hook</li>
+              <li>Handles altered-content disclosure automatically</li>
+            </ul>
+            <p className="versus-end">A record of human authorship on every video you ship.</p>
+          </div>
         </div>
       </section>
 
